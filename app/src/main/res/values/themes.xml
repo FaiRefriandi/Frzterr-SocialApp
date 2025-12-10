@@ -1,23 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
+    <!-- MAIN APP THEME -->
     <style name="Theme.Frzterr" parent="Theme.MaterialComponents.DayNight.NoActionBar.Bridge">
+
         <!-- Full edge-to-edge -->
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
 
-        <!-- Agar adaptive di berbagai HP -->
+        <!-- Status & navigation icon contrast -->
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar">true</item>
 
+        <!-- Hilangkan ripple & efek klik default -->
         <item name="selectableItemBackgroundBorderless">@null</item>
         <item name="selectableItemBackground">@null</item>
         <item name="colorControlHighlight">@android:color/transparent</item>
 
+        <!-- Bottom navigation custom -->
         <item name="bottomNavigationStyle">@style/Frzterr.BottomNav</item>
     </style>
 
+
+    <!-- BOTTOM NAV STYLE -->
     <style name="Frzterr.BottomNav" parent="Widget.MaterialComponents.BottomNavigationView">
         <item name="itemIconSize">@dimen/bottom_nav_icon_size</item>
+    </style>
+
+
+    <!-- SPLASH SCREEN THEME -->
+    <style name="Theme.Frzterr.Splash" parent="Theme.SplashScreen">
+
+        <!-- Background warna splash -->
+        <item name="windowSplashScreenBackground">@color/background</item>
+
+        <!-- Logo splash (vector) -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/logo_splash_screen</item>
+
+        <!-- Hilangkan background icon -->
+        <item name="windowSplashScreenIconBackgroundColor">@android:color/transparent</item>
+
+        <!-- Setelah splash, pakai theme utama -->
+        <item name="postSplashScreenTheme">@style/Theme.Frzterr</item>
     </style>
 
 </resources>

@@ -15,6 +15,11 @@
         android:label="Explore" />
 
     <fragment
+        android:id="@+id/messageFragment"
+        android:name="com.frzlss.frzterr.ui.message.MessageFragment"
+        android:label="Message" />
+
+    <fragment
         android:id="@+id/profileFragment"
         android:name="com.frzlss.frzterr.ui.profile.ProfileFragment"
         android:label="Profile" />

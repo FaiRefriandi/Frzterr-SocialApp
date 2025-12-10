@@ -21,7 +21,7 @@
         android:id="@+id/bottom_nav"
         app:itemRippleColor="@null"
         android:layout_width="match_parent"
-        android:layout_height="60dp"
+        android:layout_height="80dp"
         android:background="@color/background"
         app:menu="@menu/menu_bottom_nav"
         app:labelVisibilityMode="unlabeled"

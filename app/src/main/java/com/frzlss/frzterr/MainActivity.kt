@@ -1,30 +1,32 @@
 package com.frzlss.frzterr
 
+import android.content.Intent
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.view.WindowInsetsController
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsControllerCompat
-import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.frzlss.frzterr.data.repository.auth.AuthRepository
 import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
 
+    private val authRepository = AuthRepository()
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
 
-        // Wajib sebelum setContentView
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (!authRepository.isLoggedIn()) {
+            navigateToAuth()
+            return
+        }
 
-        // Bikin system bar transparan
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
-
-        // Matikan background otomatis gesture pill
         window.setNavigationBarContrastEnforced(false)
         window.setStatusBarContrastEnforced(false)
 
@@ -32,19 +34,23 @@ class MainActivity : AppCompatActivity() {
 
         val navHostFragment =
             supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-
         val navController = navHostFragment.navController
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNav.setupWithNavController(navController)
+    }
 
-        val controller = window.insetsController
+    override fun onStart() {
+        super.onStart()
 
-        // Adaptive status bar icons
-        controller?.setSystemBarsAppearance(
-            0,
-            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
-        )
+        if (!authRepository.isLoggedIn()) {
+            navigateToAuth()
+        }
+    }
 
+    private fun navigateToAuth() {
+        val intent = Intent(this, com.frzlss.frzterr.ui.auth.AuthActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
     }
 }
