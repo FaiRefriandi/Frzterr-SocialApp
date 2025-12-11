@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="?attr/actionBarSize"
+    android:background="@color/background">
+
+    <!-- HEADER -->
+    <LinearLayout
+        android:id="@+id/headerSectionReset"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="28dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/tvTitleReset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Atur Ulang Password"
+            android:textColor="#FFFFFF"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp"/>
+
+        <TextView
+            android:id="@+id/tvSubtitleReset"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Masukkan email Anda untuk menerima kode OTP"
+            android:textColor="#B8B8B8"
+            android:textSize="14sp"/>
+    </LinearLayout>
+
+    <!-- BOTTOM SHEET -->
+    <LinearLayout
+        android:id="@+id/bottomSheetReset"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/bg_bottom_sheet"
+        android:orientation="vertical"
+        android:padding="30dp"
+        android:clipToOutline="true"
+        android:layout_marginTop="50dp"
+        app:layout_constraintTop_toBottomOf="@id/headerSectionReset"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <!-- EMAIL FIELD -->
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:placeholderText="Masukkan Email Anda"
+            app:placeholderTextColor="#888888"
+            app:cursorColor="@color/white"
+            app:hintEnabled="false"
+            app:boxBackgroundMode="filled"
+            app:boxBackgroundColor="#2A2A2A"
+            app:boxStrokeWidth="0dp"
+            app:boxStrokeWidthFocused="0dp"
+            app:boxStrokeColor="@android:color/transparent"
+            app:boxCornerRadiusTopStart="14dp"
+            app:boxCornerRadiusTopEnd="14dp"
+            app:boxCornerRadiusBottomStart="14dp"
+            app:boxCornerRadiusBottomEnd="14dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edtResetEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textEmailAddress"
+                android:minHeight="56dp"
+                android:hint="Masukkan Email Anda"
+                android:paddingVertical="14dp"
+                android:textColor="#FFFFFF"
+                android:textColorHint="#888888"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- BUTTON -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSendOtp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Kirim Kode Verifikasi"
+            android:textAllCaps="false"
+            android:layout_marginTop="20dp"
+            android:textColor="#FFFFFF"
+            android:backgroundTint="#3B82F6"
+            app:cornerRadius="50dp"
+            android:minHeight="62dp"
+            android:paddingVertical="18dp"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

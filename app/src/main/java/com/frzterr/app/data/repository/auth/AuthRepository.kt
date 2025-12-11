@@ -9,6 +9,12 @@ import io.github.jan.supabase.auth.providers.builtin.IDToken
 import io.github.jan.supabase.auth.user.UserInfo
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 
 class AuthRepository {
 
@@ -45,14 +51,77 @@ class AuthRepository {
     }
 
     // ============================================================
-    // RESET PASSWORD
+    // RESET PASSWORD (Send OTP → Edge Function) using OkHttp
     // ============================================================
-    suspend fun sendPasswordResetEmail(email: String) {
-        auth.resetPasswordForEmail(email)
+
+    // Ganti PROJECT_REF jika bukan project ref yang benar
+    private val PROJECT_REF = "wulshdvhdlcwlhsozkzl"
+    private val FUNCTIONS_BASE = "https://$PROJECT_REF.functions.supabase.co"
+    private val httpClient = OkHttpClient()
+
+    suspend fun sendResetOtp(email: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            Log.e("SUPABASE_RESET_PW", "Sending OTP to: $email (via functions endpoint)")
+
+            val url = "$FUNCTIONS_BASE/send-otp"
+            val json = """{ "email":"${email.replace("\"","\\\"")}" }"""
+            val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+            val body = json.toRequestBody(mediaType)
+
+            val req = Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("Authorization", "Bearer ${SupabaseManager.ANON_KEY}")
+                .addHeader("apikey", SupabaseManager.ANON_KEY)
+                .addHeader("Content-Type", "application/json")
+                .build()
+
+            httpClient.newCall(req).execute().use { resp ->
+                Log.e("SUPABASE_RESET_PW", "send-otp HTTP ${resp.code}")
+                return@withContext resp.isSuccessful
+            }
+        } catch (e: Exception) {
+            Log.e("SUPABASE_RESET_PW", "sendResetOtp error: ${e.message}", e)
+            return@withContext false
+        }
     }
-    suspend fun updatePassword(newPassword: String) {
-        auth.updateUser {
-            password = newPassword
+
+    // ============================================================
+    // VERIFY OTP & UPDATE PASSWORD → Edge Function using OkHttp
+    // ============================================================
+
+    suspend fun verifyResetOtp(email: String, otp: String, newPassword: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            Log.e("SUPABASE_RESET_VERIFY", "Verifying OTP for email: $email (via functions endpoint)")
+
+            val url = "$FUNCTIONS_BASE/verify-reset"
+            // escape strings minimally
+            val payload = buildString {
+                append("{")
+                append("\"email\":\"${email.replace("\"","\\\"")}\",")
+                append("\"otp\":\"${otp.replace("\"","\\\"")}\",")
+                append("\"newPassword\":\"${newPassword.replace("\"","\\\"")}\"")
+                append("}")
+            }
+
+            val mediaType = "application/json; charset=utf-8".toMediaTypeOrNull()
+            val body = payload.toRequestBody(mediaType)
+
+            val req = Request.Builder()
+                .url(url)
+                .post(body)
+                .addHeader("Authorization", "Bearer ${SupabaseManager.ANON_KEY}")
+                .addHeader("apikey", SupabaseManager.ANON_KEY)
+                .addHeader("Content-Type", "application/json")
+                .build()
+
+            httpClient.newCall(req).execute().use { resp ->
+                Log.e("SUPABASE_RESET_VERIFY", "verify-reset HTTP ${resp.code}")
+                return@withContext resp.isSuccessful
+            }
+        } catch (e: Exception) {
+            Log.e("SUPABASE_RESET_VERIFY", "verifyResetOtp error: ${e.message}", e)
+            return@withContext false
         }
     }
 

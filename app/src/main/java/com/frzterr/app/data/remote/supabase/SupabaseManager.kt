@@ -17,6 +17,9 @@ object SupabaseManager {
     private const val SUPABASE_KEY =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind1bHNoZHZoZGxjd2xoc296a3psIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzMTMxNjMsImV4cCI6MjA4MDg4OTE2M30.LLoCyRJ8SMZfCBNw9z4qIXzQB43bAU_2ajnAJecpX38"
 
+    val ANON_KEY: String
+        get() = SUPABASE_KEY
+
     lateinit var client: SupabaseClient
         private set
 

@@ -16,29 +16,25 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Frzterr">
 
+        <!-- LOGIN SCREEN -->
         <activity
             android:name=".ui.auth.AuthActivity"
             android:theme="@style/Theme.Frzterr"
             android:exported="false" />
 
-        <!-- RESET PASSWORD ACTIVITY -->
+        <!-- RESET PASSWORD - STEP 1 (Input Email) -->
         <activity
-            android:name=".ui.auth.ResetPasswordActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Frzterr">
+            android:name=".ui.auth.AuthResetEmailActivity"
+            android:theme="@style/Theme.Frzterr"
+            android:exported="false" />
 
-            <intent-filter android:autoVerify="true">
-                <action android:name="android.intent.action.VIEW" />
+        <!-- RESET PASSWORD - STEP 2 (Verify OTP + New Password) -->
+        <activity
+            android:name=".ui.auth.AuthVerifyOtpActivity"
+            android:theme="@style/Theme.Frzterr"
+            android:exported="false" />
 
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:scheme="frzterr"
-                    android:host="reset-password" />
-            </intent-filter>
-        </activity>
-
+        <!-- MAIN APP -->
         <activity
             android:name=".MainActivity"
             android:exported="true"

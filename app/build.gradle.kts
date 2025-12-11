@@ -94,4 +94,8 @@ dependencies {
 
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
     implementation("com.google.firebase:firebase-analytics")
+
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")
+    implementation("com.squareup.moshi:moshi:1.15.0")
+
 }

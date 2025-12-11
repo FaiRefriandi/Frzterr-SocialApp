@@ -24,6 +24,7 @@ import com.frzterr.app.data.remote.supabase.SupabaseManager
 import com.frzterr.app.data.repository.auth.AuthRepository
 import com.frzterr.app.data.repository.user.UserRepository
 import com.frzterr.app.databinding.ActivityAuthBinding
+import com.frzterr.app.ui.auth.AuthResetEmailActivity
 import com.frzterr.app.utils.GoogleSignInHelper
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.jsonObject
@@ -34,7 +35,6 @@ class AuthActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAuthBinding
     private val authRepository = AuthRepository()
     private val userRepository = UserRepository()
-
     private lateinit var googleHelper: GoogleSignInHelper
 
     private var isLoginMode = true
@@ -128,29 +128,12 @@ class AuthActivity : AppCompatActivity() {
         }
 
         tvForgotPassword.setOnClickListener {
-            val email = binding.edtLoginEmail.text.toString().trim()
-
-            if (email.isEmpty()) {
-                showToast("Masukkan email terlebih dahulu")
-                return@setOnClickListener
-            }
-
-            lifecycleScope.launch {
-                try {
-                    setLoading(true)
-                    authRepository.sendPasswordResetEmail(email)
-                    showToast("Link reset password telah dikirim ke email Anda")
-                } catch (e: Exception) {
-                    showToast("Gagal mengirim reset: ${e.message}")
-                } finally {
-                    setLoading(false)
-                }
-            }
+            startActivity(Intent(this@AuthActivity, AuthResetEmailActivity::class.java))
         }
     }
 
     // ============================================================================
-    // GOOGLE LOGIN (Credential Manager)
+    // GOOGLE LOGIN
     // ============================================================================
 
     private fun loginWithGoogle() {
