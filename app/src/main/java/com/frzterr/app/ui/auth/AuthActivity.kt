@@ -17,6 +17,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.frzterr.app.MainActivity
@@ -32,10 +33,17 @@ import kotlinx.serialization.json.jsonPrimitive
 
 class AuthActivity : AppCompatActivity() {
 
+    private val COLOR_RED = Color.parseColor("#EF4444")
+    private val COLOR_ORANGE = Color.parseColor("#F97316")
+    private val COLOR_GREEN = Color.parseColor("#22C55E")
+    private var usernameTouched = false
+
     private lateinit var binding: ActivityAuthBinding
     private val authRepository = AuthRepository()
     private val userRepository = UserRepository()
     private lateinit var googleHelper: GoogleSignInHelper
+
+    private var usernameCheckJob: kotlinx.coroutines.Job? = null
 
     private var isLoginMode = true
 
@@ -61,14 +69,133 @@ class AuthActivity : AppCompatActivity() {
         googleHelper = GoogleSignInHelper(this)
 
         setupClicks()
+        setupUsernameAvailabilityCheck()
         switchToLogin()
 
         binding.root.post { updateStatusBarIconColor() }
     }
 
-    // ============================================================================
+    private fun showUsernameEmpty() = with(binding) {
+        tvUsernameStatus.visibility = View.VISIBLE
+        tvUsernameStatus.text = "Pilih nama pengguna untuk melanjutkan"
+        tvUsernameStatus.setTextColor(COLOR_RED)
+        setUsernameStroke(COLOR_RED)
+    }
+
+    private fun showUsernameTooShort() = with(binding) {
+        tvUsernameStatus.visibility = View.VISIBLE
+        tvUsernameStatus.text = "Nama pengguna tidak tersedia"
+        tvUsernameStatus.setTextColor(COLOR_RED)
+        setUsernameStroke(COLOR_RED)
+    }
+
+    private fun showUsernameTaken() = with(binding) {
+        tvUsernameStatus.visibility = View.VISIBLE
+        tvUsernameStatus.text = "Nama pengguna telah digunakan"
+        tvUsernameStatus.setTextColor(COLOR_ORANGE)
+        setUsernameStroke(COLOR_ORANGE)
+    }
+
+    private fun showUsernameAvailable() = with(binding) {
+        tvUsernameStatus.visibility = View.VISIBLE
+        tvUsernameStatus.text = "Nama pengguna tersedia"
+        tvUsernameStatus.setTextColor(COLOR_GREEN)
+        setUsernameStroke(COLOR_GREEN)
+    }
+    private fun setUsernameStroke(color: Int) {
+        val states = arrayOf(
+            intArrayOf(android.R.attr.state_focused),
+            intArrayOf(-android.R.attr.state_focused)
+        )
+
+        val colors = intArrayOf(
+            color, // focused
+            color  // unfocused
+        )
+
+        binding.tilSignupUsername.setBoxStrokeColorStateList(
+            android.content.res.ColorStateList(states, colors)
+        )
+    }
+
+    private fun isValidEmail(email: String): Boolean {
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            return false
+        }
+
+        // Pastikan domain punya TLD (contoh: gmail.com)
+        val parts = email.substringAfter("@", "")
+        if (!parts.contains(".")) return false
+
+        val tld = parts.substringAfterLast(".", "")
+        if (tld.length < 2) return false
+
+        return true
+    }
+
+
+    // =========================================================================
+    // USERNAME CHECKER
+    // =========================================================================
+
+    private fun setupUsernameAvailabilityCheck() = with(binding) {
+
+        edtSignupUsername.setOnFocusChangeListener { _, hasFocus ->
+            if (hasFocus) {
+                usernameTouched = true
+
+                if (edtSignupUsername.text.isNullOrBlank()) {
+                    showUsernameEmpty()
+                }
+            }
+        }
+
+        edtSignupUsername.addTextChangedListener(object : android.text.TextWatcher {
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                if (!usernameTouched) return
+
+                usernameCheckJob?.cancel()
+
+                val username = s.toString().trim().lowercase()
+
+                // KOSONG
+                if (username.isEmpty()) {
+                    showUsernameEmpty()
+                    return
+                }
+
+                // TERLALU PENDEK / INVALID
+                if (username.length < 4 ||
+                    !Regex("^[a-z][a-z0-9_]{3,19}$").matches(username)
+                ) {
+                    showUsernameTooShort()
+                    return
+                }
+
+                // DEBOUNCE DB CHECK
+                usernameCheckJob = lifecycleScope.launch {
+                    kotlinx.coroutines.delay(400)
+
+                    val available = userRepository.isUsernameAvailable(username)
+
+                    if (available) {
+                        showUsernameAvailable()
+                    } else {
+                        showUsernameTaken()
+                    }
+                }
+            }
+
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        })
+    }
+
+    // =========================================================================
     // STATUS BAR
-    // ============================================================================
+    // =========================================================================
 
     private fun updateStatusBarIconColor() {
         val bgColor = (binding.root.background as? ColorDrawable)?.color ?: Color.BLACK
@@ -86,9 +213,9 @@ class AuthActivity : AppCompatActivity() {
         return darkness >= 0.5
     }
 
-    // ============================================================================
-    // BUTTON HANDLERS
-    // ============================================================================
+    // =========================================================================
+    // CLICK HANDLERS
+    // =========================================================================
 
     private fun setupClicks() = with(binding) {
 
@@ -101,26 +228,37 @@ class AuthActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
+            if (!isValidEmail(email)) {
+                showToast("Masukkan email yang valid")
+                return@setOnClickListener
+            }
+
             doEmailLogin(email, password)
         }
 
+
         btnSignup.setOnClickListener {
             val name = edtSignupName.text.toString().trim()
+            val username = edtSignupUsername.text.toString().trim()
             val email = edtSignupEmail.text.toString().trim()
             val password = edtSignupPassword.text.toString().trim()
-            val confirm = edtSignupConfirmPassword.text.toString().trim()
 
-            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-                showToast("Semua field harus diisi")
+            if (name.isEmpty() || username.isEmpty() || email.isEmpty() || password.isEmpty()) {
+                showToast("Semua kolom harus diisi")
                 return@setOnClickListener
             }
 
-            if (password != confirm) {
-                showToast("Password tidak cocok")
+            if (!isValidUsername(username)) {
+                showToast("Nama pengguna tidak valid")
                 return@setOnClickListener
             }
 
-            doEmailSignUp(name, email, password)
+            if (!isValidEmail(email)) {
+                showToast("Masukkan email yang valid")
+                return@setOnClickListener
+            }
+
+            doEmailSignUp(name, username, email, password)
         }
 
         btnGoogleLogin.setOnClickListener {
@@ -132,34 +270,30 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================================
+    // =========================================================================
     // GOOGLE LOGIN
-    // ============================================================================
+    // =========================================================================
 
     private fun loginWithGoogle() {
         lifecycleScope.launch {
             Log.e("GOOGLE_FLOW", "Launching Google Credential Manager...")
-
             setLoading(true)
 
             val idToken = googleHelper.getGoogleIdToken()
 
             if (idToken == null) {
-                Log.e("GOOGLE_FLOW", "ERROR: idToken null")
                 setLoading(false)
                 showToast("Google Sign-In gagal")
                 return@launch
             }
 
-            Log.e("GOOGLE_FLOW", "Google ID Token OK, authenticating with Supabase...")
-
             doGoogleSignIn(idToken)
         }
     }
 
-    // ============================================================================
+    // =========================================================================
     // AUTH LOGIC
-    // ============================================================================
+    // =========================================================================
 
     private fun doEmailLogin(email: String, password: String) {
         setLoading(true)
@@ -175,10 +309,21 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    private fun doEmailSignUp(name: String, email: String, password: String) {
+    private fun doEmailSignUp(
+        name: String,
+        username: String,
+        email: String,
+        password: String
+    ) {
         setLoading(true)
         lifecycleScope.launch {
             try {
+                val available = userRepository.isUsernameAvailable(username.lowercase())
+                if (!available) {
+                    showToast("Username sudah digunakan")
+                    return@launch
+                }
+
                 val user = authRepository.signUpWithEmail(email, password)
 
                 if (user != null) {
@@ -189,12 +334,15 @@ class AuthActivity : AppCompatActivity() {
                         name = name,
                         email = email,
                         avatarUrl = null,
-                        provider = "email"
+                        provider = "email",
+                        username = username,
+                        usernameLower = username.lowercase()
                     )
                 }
 
-                showToast("Registrasi berhasil!")
+                showToast("Registrasi berhasil")
                 switchToLogin()
+
             } catch (e: Exception) {
                 showToast("Registrasi gagal: ${e.message}")
             } finally {
@@ -210,36 +358,66 @@ class AuthActivity : AppCompatActivity() {
                 val supaUser = authRepository.getCurrentUser()
 
                 if (session == null || supaUser == null) {
-                    showToast("Google Sign-In gagal (session/user null)")
+                    showToast("Google Sign-In gagal")
                     return@launch
                 }
 
-                val fullName = supaUser.userMetadata?.jsonObject?.get("full_name")
-                    ?.jsonPrimitive?.content
+                val email = supaUser.email ?: return@launch
 
+                // 🔥 AMBIL USER DARI DB JIKA SUDAH ADA
+                val existingUser = userRepository.getUserByIdForce(supaUser.id)
+
+                // ===============================
+                // USERNAME (SUDAH BENAR DI KODE KAMU)
+                // ===============================
+                val (finalUsername, finalUsernameLower) =
+                    if (existingUser != null && !existingUser.username.isNullOrBlank()) {
+                        existingUser.username to existingUser.usernameLower
+                    } else {
+                        val prefix = email.substringBefore("@")
+                        userRepository.generateUniqueUsername(prefix)
+                    }
+
+                // ===============================
+                // NAMA PANGGILAN (FIX BARU)
+                // ===============================
+                val finalName =
+                    if (existingUser != null && !existingUser.fullName.isNullOrBlank()) {
+                        // ✅ USER SUDAH SET NAMA SEBELUMNYA → JANGAN TIMPA
+                        existingUser.fullName
+                    } else {
+                        // 🆕 USER BARU VIA GOOGLE → AMBIL DARI GOOGLE
+                        supaUser.userMetadata
+                            ?.jsonObject
+                            ?.get("full_name")
+                            ?.jsonPrimitive
+                            ?.content
+                    }
 
                 userRepository.createOrUpdateUser(
                     id = supaUser.id,
-                    name = fullName,
-                    email = supaUser.email,
+                    name = finalName,
+                    email = email,
                     avatarUrl = null,
-                    provider = "google"
+                    provider = "google",
+                    username = finalUsername,
+                    usernameLower = finalUsernameLower
                 )
 
                 navigateToHome()
 
             } catch (e: Exception) {
-                Log.e("SUPABASE_AUTH", "Google login failed: ${e.message}", e)
-                showToast("Google Sign-In gagal: ${e.message}")
+                Log.e("SUPABASE_AUTH", "Gagal Login Akun Google", e)
+                showToast("Login Gagal: ${e.message}")
             } finally {
                 setLoading(false)
             }
         }
     }
 
-    // ============================================================================
+    // =========================================================================
     // MODE SWITCH
-    // ============================================================================
+    // =========================================================================
 
     private fun switchToLogin() {
         isLoginMode = true
@@ -279,9 +457,13 @@ class AuthActivity : AppCompatActivity() {
         }
     }
 
-    // ============================================================================
+    // =========================================================================
     // HELPERS
-    // ============================================================================
+    // =========================================================================
+
+    private fun isValidUsername(username: String): Boolean {
+        return Regex("^[a-z][a-z0-9_]{3,19}$").matches(username)
+    }
 
     private fun setLoading(loading: Boolean) = with(binding) {
         progressBar.visibility = if (loading) View.VISIBLE else View.GONE
@@ -313,7 +495,12 @@ class AuthActivity : AppCompatActivity() {
 
         val end = start + boldText.length
 
-        spannable.setSpan(StyleSpan(Typeface.BOLD), start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(
+            StyleSpan(Typeface.BOLD),
+            start,
+            end,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
 
         val clickSpan = object : ClickableSpan() {
             override fun onClick(widget: View) = onClick()
@@ -323,7 +510,13 @@ class AuthActivity : AppCompatActivity() {
             }
         }
 
-        spannable.setSpan(clickSpan, start, end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        spannable.setSpan(
+            clickSpan,
+            start,
+            end,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
         textView.text = spannable
         textView.movementMethod = LinkMovementMethod.getInstance()
         textView.highlightColor = Color.TRANSPARENT

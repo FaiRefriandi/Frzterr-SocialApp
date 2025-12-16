@@ -165,7 +165,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:placeholderText="Nama Pengguna"
+                app:placeholderText="Nama Panggilan"
                 app:placeholderTextColor="#888888"
                 app:hintEnabled="false"
                 app:boxBackgroundMode="filled"
@@ -184,12 +184,53 @@
                     android:id="@+id/edtSignupName"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Nama Pengguna"
+                    android:hint="Nama Panggilan"
                     android:textColorHint="#888888"
                     android:inputType="textPersonName"
                     android:minHeight="56dp"
                     android:paddingVertical="14dp" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Nama Pengguna (USERNAME) -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSignupUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                app:placeholderText="Nama Pengguna"
+                app:placeholderTextColor="#888888"
+                app:hintEnabled="false"
+                app:boxBackgroundMode="outline"
+                app:cursorColor="@color/white"
+                app:boxStrokeWidth="1dp"
+                app:boxStrokeWidthFocused="1dp"
+                app:boxStrokeColor="@android:color/transparent"
+                app:boxBackgroundColor="#2A2A2A"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtSignupUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="text"
+                    android:hint="Nama Pengguna"
+                    android:textColorHint="#888888"
+                    android:minHeight="56dp"
+                    android:paddingVertical="14dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- STATUS USERNAME -->
+            <TextView
+                android:id="@+id/tvUsernameStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="12sp"
+                android:visibility="gone"/>
 
             <!-- Email -->
             <com.google.android.material.textfield.TextInputLayout
@@ -251,42 +292,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Password"
-                    android:textColorHint="#888888"
-                    android:textColor="#FFFFFF"
-                    android:inputType="textPassword"
-                    android:minHeight="56dp"
-                    android:paddingVertical="14dp" />
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Confirm -->
-            <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="14dp"
-                app:placeholderText="Masukkan Uembali Password"
-                app:placeholderTextColor="#888888"
-                app:hintEnabled="false"
-                app:endIconMode="password_toggle"
-                app:boxStrokeWidth="0dp"
-                app:boxStrokeWidthFocused="0dp"
-                app:hintTextColor="@color/white"
-                app:cursorColor="@color/white"
-                app:hintTextAppearance="@style/AuthHintTextAppearance"
-                android:focusableInTouchMode="false"
-                app:boxStrokeColor="@android:color/transparent"
-                app:boxBackgroundMode="filled"
-                app:boxBackgroundColor="#2A2A2A"
-                app:boxCornerRadiusTopStart="14dp"
-                app:boxCornerRadiusTopEnd="14dp"
-                app:boxCornerRadiusBottomStart="14dp"
-                app:boxCornerRadiusBottomEnd="14dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/edtSignupConfirmPassword"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:hint="Masukkan Ulang Password"
                     android:textColorHint="#888888"
                     android:textColor="#FFFFFF"
                     android:inputType="textPassword"

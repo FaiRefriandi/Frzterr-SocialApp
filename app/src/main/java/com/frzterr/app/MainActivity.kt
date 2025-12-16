@@ -29,14 +29,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 🔥 LOAD PROFILE LOKAL DI SINI
-        val (name, avatar) = ProfileLocalStore.load(this)
+        val (name, avatar, username) = ProfileLocalStore.load(this)
 
         if (name != null || avatar != null) {
             val vm: ProfileViewModel by viewModels()
             vm.cachedUser = AppUser(
                 id = "local",
                 fullName = name,
-                avatarUrl = avatar
+                email = null,
+                avatarUrl = avatar,
+                provider = null,
+                username = username ?: "",
+                usernameLower = username?.lowercase() ?: ""
             )
         }
 
@@ -57,14 +61,6 @@ class MainActivity : AppCompatActivity() {
 
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_nav)
         bottomNav.setupWithNavController(navController)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        if (!authRepository.isLoggedIn()) {
-            navigateToAuth()
-        }
     }
 
     private fun navigateToAuth() {

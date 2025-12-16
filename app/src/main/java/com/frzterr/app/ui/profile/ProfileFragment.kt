@@ -15,6 +15,7 @@ import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import coil.imageLoader
 import coil.load
 import com.frzterr.app.R
 import com.frzterr.app.data.local.ProfileLocalStore
@@ -28,6 +29,7 @@ import com.yalantis.ucrop.UCrop
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -60,83 +62,241 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         _binding = FragmentProfileBinding.bind(view)
 
         // ======================================================
-        // 🔥 FIRST FRAME — AVATAR LOCAL (SYNC, NO DELAY)
+        // 🔥 CHECK IF USER CHANGED (LOGIN/LOGOUT)
         // ======================================================
-        val localAvatarPath = ProfileLocalStore.loadLocalAvatarPath(requireContext())
-        if (localAvatarPath != null) {
-            val file = File(localAvatarPath)
-            if (file.exists()) {
-                binding.imgAvatar.setImageURI(Uri.fromFile(file))
-                binding.imgAvatar.background =
-                    ContextCompat.getDrawable(requireContext(), R.drawable.bg_circle)
-            }
+        val currentUserId = runBlocking { 
+            authRepo.getCurrentUser()?.id 
+        }
+        
+        // Clear cache if user changed
+        if (profileVM.cachedUser != null && profileVM.cachedUser?.id != currentUserId) {
+            profileVM.cachedUser = null
+            profileVM.lastRenderedAvatarUrl = null
         }
 
-        binding.imgAvatar.viewTreeObserver.addOnPreDrawListener(
-            object : ViewTreeObserver.OnPreDrawListener {
-                override fun onPreDraw(): Boolean {
-                    binding.imgAvatar.viewTreeObserver.removeOnPreDrawListener(this)
-
-                    val localPath = ProfileLocalStore.loadLocalAvatarPath(requireContext())
-                    if (localPath != null) {
-                        val file = File(localPath)
-                        if (file.exists()) {
-                            binding.imgAvatar.setImageURI(Uri.fromFile(file))
-                        }
-                    }
-                    return true
-                }
-            }
-        )
+        // ======================================================
+        // 🔥 LOAD LOCAL AVATAR FIRST (SYNC, NO DELAY)
+        // ======================================================
+        loadLocalAvatarSync()
 
         // ======================================================
         // 🔥 LOAD LOCAL STATE JIKA VIEWMODEL KOSONG
         // ======================================================
         if (profileVM.cachedUser == null) {
-            val (name, avatarUrl) = ProfileLocalStore.load(requireContext())
-            if (name != null || avatarUrl != null) {
-                profileVM.cachedUser = AppUser(
-                    id = "local",
-                    fullName = name,
-                    avatarUrl = avatarUrl
-                )
-            }
+            val (name, avatarUrl, username) =
+                ProfileLocalStore.load(requireContext())
+
+            profileVM.cachedUser = AppUser(
+                id = "local",
+                fullName = name,
+                avatarUrl = avatarUrl,
+                username = username ?: "",
+                usernameLower = username?.lowercase() ?: ""
+            )
         }
 
         // ======================================================
-        // 🔥 BIND STATE SECEPAT MUNGKIN
+        // 🔥 BIND STATE SECEPAT MUNGKIN (NAME & USERNAME ONLY)
         // ======================================================
         profileVM.cachedUser?.let {
-            bindProfile(it)
+            bindProfileText(it)
         }
 
         // ======================================================
-        // 🔄 SYNC DB DI BACKGROUND (TANPA LOADING)
+        // 🔄 SYNC DB DI BACKGROUND (TANPA LOADING) - ALWAYS LOAD TO REFRESH AVATAR
         // ======================================================
-        if (profileVM.cachedUser == null || profileVM.cachedUser?.id == "local") {
-            loadProfile(force = true, showLoading = false)
-        }
+        loadProfile(force = true, showLoading = false)
 
         binding.root.post { updateStatusBarIconColor() }
 
-        binding.swipeRefresh.setOnRefreshListener {
-            loadProfile(force = true, showLoading = true)
+        // ======================================================
+        // 🔥 SETUP ViewPager2 WITH SWIPEABLE TABS - INSTANT LOAD
+        // ======================================================
+        val postsAdapter = com.frzterr.app.ui.home.PostAdapter(
+            onLikeClick = { postWithUser ->
+                profileVM.toggleLike(postWithUser.post.id, postWithUser.isLiked)
+            },
+            onCommentClick = { postWithUser ->
+                val commentsBottomSheet = com.frzterr.app.ui.comments.CommentsBottomSheet(
+                    postId = postWithUser.post.id,
+                    onCommentAdded = {
+                        profileVM.cachedUser?.id?.let { userId ->
+                            profileVM.loadUserPosts(userId)
+                        }
+                    }
+                )
+                commentsBottomSheet.show(
+                    childFragmentManager,
+                    com.frzterr.app.ui.comments.CommentsBottomSheet.TAG
+                )
+            },
+            onRepostClick = { postWithUser ->
+                profileVM.toggleRepost(postWithUser.post.id, postWithUser.isReposted)
+            },
+            onUserClick = { postWithUser ->
+                // Already on profile page
+            }
+        )
+
+        val repostsAdapter = com.frzterr.app.ui.home.PostAdapter(
+            onLikeClick = { postWithUser ->
+                profileVM.toggleLike(postWithUser.post.id, postWithUser.isLiked)
+            },
+            onCommentClick = { postWithUser ->
+                val commentsBottomSheet = com.frzterr.app.ui.comments.CommentsBottomSheet(
+                    postId = postWithUser.post.id,
+                    onCommentAdded = {
+                        profileVM.cachedUser?.id?.let { userId ->
+                            profileVM.loadUserReposts(userId)
+                        }
+                    }
+                )
+                commentsBottomSheet.show(
+                    childFragmentManager,
+                    com.frzterr.app.ui.comments.CommentsBottomSheet.TAG
+                )
+            },
+            onRepostClick = { postWithUser ->
+                profileVM.toggleRepost(postWithUser.post.id, postWithUser.isReposted)
+            },
+            onUserClick = { postWithUser ->
+                // Already on profile page
+            }
+        )
+
+        // Create tab fragments list
+        val fragments = mutableListOf<ProfileTabFragment>()
+        
+        // Setup ViewPager2 adapter
+        val pagerAdapter = object : androidx.viewpager2.adapter.FragmentStateAdapter(this) {
+            override fun getItemCount(): Int = 2
+            override fun createFragment(position: Int): androidx.fragment.app.Fragment {
+                val fragment = when (position) {
+                    0 -> ProfileTabFragment.newInstance(ProfileTabFragment.TabType.POSTS)
+                    1 -> ProfileTabFragment.newInstance(ProfileTabFragment.TabType.REPOSTS)
+                    else -> ProfileTabFragment.newInstance(ProfileTabFragment.TabType.POSTS)
+                }
+                fragments.add(fragment)
+                return fragment
+            }
         }
+        
+        binding.viewPager.adapter = pagerAdapter
+        binding.viewPager.offscreenPageLimit = 1 // Keep both tabs in memory
+        
+        // Connect TabLayout with ViewPager2
+        com.google.android.material.tabs.TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.icon = when (position) {
+                0 -> context?.getDrawable(R.drawable.tab_posts_icon)
+                1 -> context?.getDrawable(R.drawable.tab_reposts_icon)
+                else -> null
+            }
+        }.attach()
+        
+        // Set icon size programmatically
+        binding.tabLayout.post {
+            for (i in 0 until binding.tabLayout.tabCount) {
+                val tab = binding.tabLayout.getTabAt(i)
+                val iconSize = (25 * resources.displayMetrics.density).toInt() // 28dp to px
+                tab?.icon?.setBounds(0, 0, iconSize, iconSize)
+            }
+        }
+
+        // Observe user posts - UPDATE IMMEDIATELY
+        profileVM.userPosts.observe(viewLifecycleOwner) { posts ->
+            postsAdapter.submitList(posts)
+            
+            // Update empty state for Posts tab
+            binding.viewPager.post {
+                val postsFragment = childFragmentManager.findFragmentByTag("f0") as? ProfileTabFragment
+                postsFragment?.updateEmptyState(posts?.isEmpty() ?: true)
+            }
+        }
+
+        // Observe user reposts - UPDATE IMMEDIATELY
+        profileVM.userReposts.observe(viewLifecycleOwner) { reposts ->
+            repostsAdapter.submitList(reposts)
+            
+            // Update empty state for Reposts tab
+            binding.viewPager.post {
+                val repostsFragment = childFragmentManager.findFragmentByTag("f1") as? ProfileTabFragment
+                repostsFragment?.updateEmptyState(reposts?.isEmpty() ?: true)
+            }
+        }
+
+        // 🚀 ALWAYS LOAD DATA - ViewModel init sudah start, ini just ensures fresh data
+        lifecycleScope.launch {
+            val currentUser = authRepo.getCurrentUser()
+            currentUser?.let { user ->
+                // If ViewModel hasn't loaded yet or needs refresh
+                if (profileVM.cachedUser == null) {
+                    profileVM.cachedUser = userRepo.getUserByIdForce(user.id)
+                }
+                
+                // Trigger load (will be fast if already loaded by init block)
+                profileVM.cachedUser?.id?.let { userId ->
+                    profileVM.loadUserPosts(userId)
+                    profileVM.loadUserReposts(userId)
+                }
+            }
+        }
+
+        // Set adapters after a slight delay to ensure fragments are created
+        binding.viewPager.postDelayed({
+            val postsFragment = childFragmentManager.findFragmentByTag("f0") as? ProfileTabFragment
+            val repostsFragment = childFragmentManager.findFragmentByTag("f1") as? ProfileTabFragment
+            
+            postsFragment?.setAdapter(postsAdapter)
+            repostsFragment?.setAdapter(repostsAdapter)
+            
+            // Trigger initial update
+            postsFragment?.updateEmptyState(profileVM.userPosts.value?.isEmpty() ?: true)
+            repostsFragment?.updateEmptyState(profileVM.userReposts.value?.isEmpty() ?: true)
+        }, 100)
 
         binding.imgAvatar.setOnClickListener {
             pickImage.launch("image/*")
         }
 
-        binding.btnLogout.setOnClickListener {
-            ProfileLocalStore.clear(requireContext())
-            lifecycleScope.launch {
-                authRepo.signOut()
-                startActivity(
-                    Intent(requireContext(), AuthActivity::class.java).apply {
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        // Menu button (overflow) with logout option
+        binding.btnMenu.setOnClickListener { view ->
+            val popup = android.widget.PopupMenu(requireContext(), view)
+            popup.menuInflater.inflate(R.menu.menu_profile, popup.menu)
+            popup.setOnMenuItemClickListener { menuItem ->
+                when (menuItem.itemId) {
+                    R.id.action_logout -> {
+                        ProfileLocalStore.clear(requireContext())
+                        lifecycleScope.launch {
+                            authRepo.signOut()
+                            startActivity(
+                                Intent(requireContext(), AuthActivity::class.java).apply {
+                                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                                }
+                            )
+                        }
+                        true
                     }
-                )
+                    else -> false
+                }
             }
+            popup.show()
+        }
+
+        // Edit Profile button (placeholder for now)
+        binding.btnEditProfile.setOnClickListener {
+            Toast.makeText(requireContext(), "Edit Profile - Coming Soon", Toast.LENGTH_SHORT).show()
+        }
+
+        // Share Profile button
+        binding.btnShareProfile.setOnClickListener {
+            val username = profileVM.cachedUser?.username ?: "user"
+            val shareText = "Check out @$username's profile!"
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, shareText)
+                type = "text/plain"
+            }
+            startActivity(Intent.createChooser(shareIntent, "Bagikan Profil"))
         }
     }
 
@@ -149,36 +309,130 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         lifecycleScope.launch {
             try {
-                if (showLoading) {
-                    binding.swipeRefresh.isRefreshing = true
-                }
 
                 val authUser = authRepo.getCurrentUser() ?: return@launch
                 val dbUser = userRepo.getUserByIdForce(authUser.id) ?: return@launch
 
                 profileVM.cachedUser = dbUser
-                bindProfile(dbUser)
+                bindProfileText(dbUser)
+                
+                // Only update avatar if URL changed
+                updateAvatarIfNeeded(dbUser.avatarUrl)
 
                 ProfileLocalStore.save(
                     requireContext(),
                     dbUser.fullName,
-                    dbUser.avatarUrl
+                    dbUser.avatarUrl,
+                    dbUser.username
                 )
+
 
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Gagal memuat profil", Toast.LENGTH_SHORT).show()
             } finally {
-                if (showLoading) {
-                    binding.swipeRefresh.isRefreshing = false
-                }
+            }
+        }
+    }
+    
+    // Variabel untuk track apakah gambar lokal sukses di-load
+    private var isLocalAvatarLoaded = false
+    private var localSavedAvatarUrl: String? = null
+
+    // ================= LOAD AVATAR FROM LOCAL FILE =================
+    private fun loadLocalAvatarSync() {
+        // Load metadata dulu untuk dapat URL yang tersimpan
+        val (name, avatarUrl, username) = ProfileLocalStore.load(requireContext())
+        localSavedAvatarUrl = avatarUrl
+
+        // 1. Coba load dari Coil Disk Cache dulu (untuk Network Image)
+        if (avatarUrl != null) {
+            val imageLoader = requireContext().imageLoader
+            val snapshot = imageLoader.diskCache?.get(avatarUrl)
+            if (snapshot != null) {
+                // Ada di cache! Tampilkan file dari snapshot
+                val file = snapshot.data.toFile()
+                binding.imgAvatar.setImageURI(Uri.fromFile(file))
+                binding.imgAvatar.background =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.bg_circle)
+                isLocalAvatarLoaded = true
+                return
+            }
+        }
+
+        // 2. Fallback: Coba load dari Local File Path (untuk Image hasil Pick Gallery)
+        val localAvatarPath = ProfileLocalStore.loadLocalAvatarPath(requireContext())
+        if (localAvatarPath != null) {
+            val file = File(localAvatarPath)
+            if (file.exists()) {
+                binding.imgAvatar.setImageURI(Uri.fromFile(file))
+                binding.imgAvatar.background =
+                    ContextCompat.getDrawable(requireContext(), R.drawable.bg_circle)
+                isLocalAvatarLoaded = true // Tandai sukses
+                return
+            }
+        }
+        
+        // 3. Gagal semua -> Placeholder
+        binding.imgAvatar.setImageResource(R.drawable.ic_user_placeholder)
+        binding.imgAvatar.background =
+            ContextCompat.getDrawable(requireContext(), R.drawable.bg_circle)
+        isLocalAvatarLoaded = false
+    }
+    
+    // ================= UPDATE AVATAR IF URL CHANGED =================
+    private fun updateAvatarIfNeeded(newAvatarUrl: String?) {
+        // 🔥 ANTI-KEDIP LOGIC v2
+        // Cek: Apakah URL baru dari server == URL yang kita simpan di lokal?
+        // DAN apakah kita tadi sukses menampilkan gambar lokal?
+        if (newAvatarUrl == localSavedAvatarUrl && isLocalAvatarLoaded) {
+            // Gambar di layar SUDAH BENAR dan SUDAH TAMPIL.
+            // Jangan load Coil sama sekali. Biarkan saja.
+            // Ini 100% menghilangkan kedipan karena tidak ada layout pass / decoding ulang.
+            return
+        }
+
+        // Kalau URL beda (user ganti foto di device lain) atau lokal tidak ada,
+        // baru kita load pakai Coil.
+        
+        // Update rendered state
+        profileVM.lastRenderedAvatarUrl = newAvatarUrl
+        
+        // URL changed, load from network with Coil
+        binding.imgAvatar.load(newAvatarUrl) {
+            crossfade(false)
+            memoryCacheKey(newAvatarUrl)
+            diskCacheKey(newAvatarUrl)
+            size(512)
+
+            placeholder(null) 
+            
+            if (newAvatarUrl == null) {
+                error(R.drawable.ic_user_placeholder)
+                fallback(R.drawable.ic_user_placeholder)
+            } else {
+                error(R.drawable.ic_user_placeholder)
             }
         }
     }
 
-    // ================= BIND UI =================
-    private fun bindProfile(user: AppUser) {
+    // ================= BIND UI (TEXT ONLY) =================
+    private fun bindProfileText(user: AppUser) {
+        // Nama panggilan
         binding.tvName.text = user.fullName ?: ""
 
+        // Username dengan awalan @
+        binding.tvUsername.text =
+            if (!user.username.isNullOrBlank()) {
+                "@${user.username}"
+            } else {
+                ""
+            }
+    }
+
+    // ================= BIND UI (LEGACY - WITH AVATAR) =================
+    private fun bindProfile(user: AppUser) {
+        bindProfileText(user)
+        
         binding.imgAvatar.background =
             ContextCompat.getDrawable(requireContext(), R.drawable.bg_circle)
 
@@ -219,7 +473,7 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 val compressed = compressImage(uri)
                 val fileName = "${user.id}.jpg"
 
-                // 🔥 SIMPAN FILE LOKAL UNTUK FIRST RENDER
+                // ðŸ”¥ SIMPAN FILE LOKAL UNTUK FIRST RENDER
                 val localFile = File(
                     requireContext().filesDir,
                     "avatar_${user.id}.jpg"
@@ -257,7 +511,8 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 ProfileLocalStore.save(
                     requireContext(),
                     profileVM.cachedUser?.fullName,
-                    versionedUrl
+                    versionedUrl,
+                    profileVM.cachedUser?.username
                 )
 
                 bindProfile(profileVM.cachedUser!!)

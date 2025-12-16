@@ -5,4 +5,12 @@
         <item name="android:textSize">9sp</item>
         <item name="android:paddingLeft">10dp</item>
     </style>
+    <style name="CircleImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+    <style name="RoundedImageView">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
 </resources>

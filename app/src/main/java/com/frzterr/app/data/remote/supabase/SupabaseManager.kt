@@ -38,13 +38,22 @@ object SupabaseManager {
             supabaseUrl = SUPABASE_URL,
             supabaseKey = SUPABASE_KEY
         ) {
-            install(Auth)
+            install(Auth) {
+                // Enable automatic token refresh
+                autoSaveToStorage = true
+                autoLoadFromStorage = true
+                alwaysAutoRefresh = true
+                
+                // Configure session management
+                scheme = "app"
+                host = "supabase"
+            }
             install(Postgrest)
             install(Storage)
         }
 
         initialized = true
 
-        Log.e("SUPABASE_INIT", "SupabaseClient ready")
+        Log.e("SUPABASE_INIT", "SupabaseClient ready with session persistence")
     }
 }

@@ -27,6 +27,16 @@
         <item name="itemIconSize">@dimen/bottom_nav_icon_size</item>
     </style>
 
+    <!-- BOTTOM SHEET DIALOG THEME -->
+    <!-- BOTTOM SHEET DIALOG THEME -->
+    <style name="Frzterr.BottomSheetDialog" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/Widget.MaterialComponents.BottomSheet.Modal</item>
+        <!-- Ensure text appearance attributes are present -->
+        <item name="textAppearanceBody1">@style/TextAppearance.MaterialComponents.Body1</item>
+        <item name="textAppearanceBody2">@style/TextAppearance.MaterialComponents.Body2</item>
+        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
+    </style>
+
 
     <!-- SPLASH SCREEN THEME -->
     <style name="Theme.Frzterr.Splash" parent="Theme.SplashScreen">

@@ -182,6 +182,21 @@ class AuthRepository {
     }
 
     // ============================================================
+    // REFRESH SESSION
+    // ============================================================
+    
+    suspend fun refreshSession(): Boolean {
+        return try {
+            auth.refreshCurrentSession()
+            Log.e("SUPABASE_AUTH", "Session refreshed successfully")
+            true
+        } catch (e: Exception) {
+            Log.e("SUPABASE_AUTH", "Failed to refresh session: ${e.message}", e)
+            false
+        }
+    }
+
+    // ============================================================
     // UPDATE DISPLAY AVATAR
     // ============================================================
     suspend fun updateCustomAvatar(url: String) {
