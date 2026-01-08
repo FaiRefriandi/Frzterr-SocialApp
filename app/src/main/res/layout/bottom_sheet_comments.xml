@@ -109,6 +109,55 @@
         android:layout_height="1dp"
         android:background="#2A2A2A"/>
 
+    <!-- REPLY CONTEXT BANNER -->
+    <LinearLayout
+        android:id="@+id/replyBanner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:background="#1A1A1A"
+        android:visibility="gone">
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imgReplyAvatar"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/CircleImageView"/>
+
+        <TextView
+            android:id="@+id/tvReplyingTo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:text="Replying to username"
+            android:textColor="#AAAAAA"
+            android:textSize="13sp"
+            android:singleLine="true"
+            android:ellipsize="end"/>
+
+        <ImageView
+            android:id="@+id/btnCancelReply"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:contentDescription="Cancel reply"
+            app:tint="#999999"
+            android:background="?attr/selectableItemBackgroundBorderless"/>
+    </LinearLayout>
+
+    <!-- DIVIDER BEFORE INPUT -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#2A2A2A"/>
+
     <!-- INPUT AREA -->
     <LinearLayout
         android:layout_width="match_parent"

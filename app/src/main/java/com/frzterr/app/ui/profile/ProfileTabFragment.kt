@@ -18,7 +18,6 @@ class ProfileTabFragment : androidx.fragment.app.Fragment() {
     private var tabType: TabType = TabType.POSTS
     private var recyclerView: RecyclerView? = null
     private var emptyState: LinearLayout? = null
-    private var scrollView: androidx.core.widget.NestedScrollView? = null
     private var shimmerViewContainer: com.facebook.shimmer.ShimmerFrameLayout? = null
 
     companion object {
@@ -53,7 +52,6 @@ class ProfileTabFragment : androidx.fragment.app.Fragment() {
         
         recyclerView = view.findViewById(R.id.rvTabContent)
         emptyState = view.findViewById(R.id.emptyState)
-        scrollView = view.findViewById(R.id.scrollView)
         shimmerViewContainer = view.findViewById(R.id.shimmerViewContainer)
 
         // Set empty message based on tab type
@@ -61,12 +59,23 @@ class ProfileTabFragment : androidx.fragment.app.Fragment() {
             TabType.POSTS -> "Belum ada postingan"
             TabType.REPOSTS -> "Belum ada repost"
         }
+
+        recyclerView?.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                val bottomNav = requireActivity().findViewById<View>(R.id.bottom_nav) ?: return
+                
+                // Threads-like synchronous scroll
+                val currentTranslation = bottomNav.translationY
+                val newTranslation = (currentTranslation + dy).coerceIn(0f, bottomNav.height.toFloat())
+                
+                bottomNav.translationY = newTranslation
+            }
+        })
     }
 
     fun setAdapter(adapter: RecyclerView.Adapter<*>) {
         recyclerView?.adapter = adapter
-        // Update scrollability after adapter is set and items are laid out
-        recyclerView?.post { updateScrollability() }
     }
 
     fun showLoading(isLoading: Boolean) {
@@ -79,45 +88,16 @@ class ProfileTabFragment : androidx.fragment.app.Fragment() {
             shimmerViewContainer?.stopShimmer()
             shimmerViewContainer?.visibility = View.GONE
             recyclerView?.visibility = View.VISIBLE
-            
-            // Re-check empty state if needed, can be handled by caller calling updateEmptyState
         }
     }
 
     fun updateEmptyState(isEmpty: Boolean) {
-        // Only show empty state if NOT loading
         if (shimmerViewContainer?.visibility != View.VISIBLE) {
             emptyState?.visibility = if (isEmpty) View.VISIBLE else View.GONE
-            // Update scroll after visibility change
-            scrollView?.post { updateScrollability() }
         }
     }
     
-    /**
-     * Dynamically enable/disable scroll based on actual content height
-     * Only scrollable if content exceeds viewport height
-     */
-    private fun updateScrollability() {
-        scrollView?.post {
-            // Get the actual content height (RecyclerView or EmptyState)
-            val contentHeight = if (emptyState?.visibility == View.VISIBLE) {
-                // Empty state height is minimal, no scroll needed
-                emptyState?.height ?: 0
-            } else {
-                // Get RecyclerView's total content height
-                recyclerView?.height ?: 0
-            }
-            
-            val scrollViewHeight = scrollView?.height ?: 0
-            
-            // Enable scroll only if content is larger than viewport
-            val shouldScroll = contentHeight > scrollViewHeight
-            
-            // Block touch when scroll is not needed
-            scrollView?.setOnTouchListener { _, _ -> !shouldScroll }
-            scrollView?.isNestedScrollingEnabled = shouldScroll
-        }
-    }
+    fun getRecyclerView(): RecyclerView? = recyclerView
 
     fun getTabType(): TabType = tabType
 }

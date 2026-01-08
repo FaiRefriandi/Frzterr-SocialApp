@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="bottom_nav_icon_size">24dp</dimen>
+    <dimen name="bottom_nav_icon_size">26dp</dimen>
     <dimen name="post_action_icon_size">20dp</dimen>
     <dimen name="reply_indent">48dp</dimen>
 </resources>

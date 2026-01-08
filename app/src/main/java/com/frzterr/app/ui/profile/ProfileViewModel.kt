@@ -9,10 +9,17 @@ import com.frzterr.app.data.repository.auth.AuthRepository
 import com.frzterr.app.data.repository.post.PostRepository
 import com.frzterr.app.data.repository.user.AppUser
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class ProfileViewModel : ViewModel() {
-    var cachedUser: AppUser? = null
+    private val _user = MutableLiveData<AppUser?>()
+    val user: LiveData<AppUser?> = _user
+
     var lastRenderedAvatarUrl: String? = null
+    var lastImageClickTime: Long = 0L
+    
+    // 🔥 Store AppBarLayout offset to persist collapse state across navigation
+    var appBarOffset: Int = 0
 
     private val postRepo = PostRepository()
     private val authRepo = AuthRepository()
@@ -20,6 +27,12 @@ class ProfileViewModel : ViewModel() {
 
     private val _userPosts = MutableLiveData<List<PostWithUser>>(emptyList())
     val userPosts: LiveData<List<PostWithUser>> = _userPosts
+    
+    fun clearData() {
+        _userPosts.value = emptyList()
+        _userReposts.value = emptyList()
+        _user.value = null
+    }
 
     // 🚀 PRE-LOAD DATA SAAT VIEWMODEL DIBUAT
     init {
@@ -36,7 +49,7 @@ class ProfileViewModel : ViewModel() {
                 val currentUser = authRepo.getCurrentUser() ?: return@launch
                 val dbUser = userRepo.getUserByIdForce(currentUser.id) ?: return@launch
 
-                cachedUser = dbUser
+                _user.value = dbUser
 
                 // Pre-load posts and reposts in parallel
                 launch { loadUserPosts(dbUser.id) }
@@ -47,7 +60,10 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
-    fun loadUserPosts(userId: String) {
+    fun loadUserPosts(userId: String, force: Boolean = false) {
+        // OPTIMIZATION: Skip if already loaded for same user (unless forced)
+        if (!force && _userPosts.value?.isNotEmpty() == true && _user.value?.id == userId) return
+
         viewModelScope.launch {
             try {
                 val currentUser = authRepo.getCurrentUser() ?: return@launch
@@ -63,7 +79,7 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val currentUser = authRepo.getCurrentUser() ?: return@launch
-                val userId = cachedUser?.id ?: return@launch
+                val userId = _user.value?.id ?: return@launch
 
                 // ⚡ INSTANT Optimistic update for BOTH posts and reposts
                 val optimisticPosts = _userPosts.value?.map { postWithUser ->
@@ -113,7 +129,7 @@ class ProfileViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                cachedUser?.id?.let {
+                _user.value?.id?.let {
                     loadUserPosts(it)
                     loadUserReposts(it)
                 }
@@ -124,7 +140,10 @@ class ProfileViewModel : ViewModel() {
     private val _userReposts = MutableLiveData<List<PostWithUser>>(emptyList())
     val userReposts: LiveData<List<PostWithUser>> = _userReposts
 
-    fun loadUserReposts(userId: String) {
+    fun loadUserReposts(userId: String, force: Boolean = false) {
+        // OPTIMIZATION: Skip if already loaded for same user (unless forced)
+        if (!force && _userReposts.value?.isNotEmpty() == true && _user.value?.id == userId) return
+
         viewModelScope.launch {
             try {
                 val currentUser = authRepo.getCurrentUser() ?: return@launch
@@ -140,7 +159,7 @@ class ProfileViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 val currentUser = authRepo.getCurrentUser() ?: return@launch
-                val userId = cachedUser?.id ?: return@launch
+                val userId = _user.value?.id ?: return@launch
 
                 // ⚡ INSTANT Optimistic update for BOTH posts and reposts
                 val optimisticPosts = _userPosts.value?.map { postWithUser ->
@@ -190,7 +209,7 @@ class ProfileViewModel : ViewModel() {
                 }
 
             } catch (e: Exception) {
-                cachedUser?.id?.let {
+                _user.value?.id?.let {
                     loadUserPosts(it)
                     loadUserReposts(it)
                 }
@@ -271,5 +290,91 @@ class ProfileViewModel : ViewModel() {
         
         _userPosts.value = oldPosts?.filter { it.post.id != postId }
         _userReposts.value = oldReposts?.filter { it.post.id != postId }
+    }
+
+    // ========================================================================
+    // FOLLOW SYSTEM LOGIC
+    // ========================================================================
+    private val _isFollowing = MutableLiveData<Boolean>(false)
+    val isFollowing: LiveData<Boolean> = _isFollowing
+
+    private val _followerCount = MutableLiveData<Long>(0)
+    val followerCount: LiveData<Long> = _followerCount
+
+    private val _followingCount = MutableLiveData<Long>(0)
+    val followingCount: LiveData<Long> = _followingCount
+
+    fun loadFollowData(targetUserId: String) {
+        viewModelScope.launch {
+            try {
+                val currentUser = authRepo.getCurrentUser()
+                
+                // Get counts in parallel
+                launch {
+                    // 🌟 CUSTOM FOLLOWER COUNTS 🌟
+                    // Map of UserId -> Custom Count
+                    val customFollowerCounts = mapOf(
+                        "c86fe677-236f-4244-ba16-40f78fdc373f" to 666L, // Contoh user ID (Frefriandi?)
+                        // Tambahkan ID lain di sini
+                        // "user_id_lain" to 1000000L
+                    )
+
+                    val followers = if (customFollowerCounts.containsKey(targetUserId)) {
+                        customFollowerCounts[targetUserId] ?: 0L
+                    } else {
+                        userRepo.getFollowerCount(targetUserId)
+                    }
+                    _followerCount.value = followers
+                }
+                
+                launch {
+                    val following = userRepo.getFollowingCount(targetUserId)
+                    _followingCount.value = following
+                }
+
+                // Check if current user is following target user
+                if (currentUser != null && currentUser.id != targetUserId) {
+                    val following = userRepo.isFollowing(currentUser.id, targetUserId)
+                    _isFollowing.value = following
+                } else {
+                    _isFollowing.value = false
+                }
+            } catch (e: Exception) {
+                // Ignore errors
+            }
+        }
+    }
+
+    fun toggleFollow(targetUserId: String) {
+        viewModelScope.launch {
+            try {
+                val currentUserId = authRepo.getCurrentUser()?.id ?: return@launch
+                val currentlyFollowing = _isFollowing.value ?: false
+                
+                // Optimistic Update
+                _isFollowing.value = !currentlyFollowing
+                _followerCount.value = (_followerCount.value ?: 0L) + (if (currentlyFollowing) -1 else 1)
+                
+                // Use correct repository methods based on current status
+                val result = if (currentlyFollowing) {
+                    userRepo.unfollowUser(currentUserId, targetUserId)
+                } else {
+                    userRepo.followUser(currentUserId, targetUserId)
+                }
+
+                if (result.isFailure) {
+                    // Rollback on failure
+                    _isFollowing.value = currentlyFollowing
+                    _followerCount.value = (_followerCount.value ?: 0L) + (if (currentlyFollowing) 1 else -1)
+                }
+            } catch (e: Exception) {
+                // Refresh data if something goes wrong
+                loadFollowData(targetUserId)
+            }
+        }
+    }
+
+    fun updateUser(updatedUser: AppUser?) {
+        _user.value = updatedUser
     }
 }

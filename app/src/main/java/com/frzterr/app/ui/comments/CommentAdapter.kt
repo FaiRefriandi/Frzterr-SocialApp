@@ -25,7 +25,8 @@ class CommentAdapter(
     private val onLikeClick: (CommentWithUser) -> Unit,
     private val onReplyClick: (CommentWithUser) -> Unit,
     private val onDeleteClick: (CommentWithUser) -> Unit,
-    private val onReplyToggle: (String) -> Unit
+    private val onReplyToggle: (String) -> Unit,
+    private val onUserClick: (CommentWithUser) -> Unit
 ) : ListAdapter<CommentWithUser, CommentAdapter.CommentViewHolder>(CommentDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentViewHolder {
@@ -83,6 +84,9 @@ class CommentAdapter(
                     }
                 )
             }
+            
+            imgAvatar.setOnClickListener { onUserClick(commentWithUser) }
+            tvUsername.setOnClickListener { onUserClick(commentWithUser) }
             
             // Get commentContainer reference (used for indentation and gestures)
             val commentContainer = itemView.findViewById<View>(R.id.commentContainer)

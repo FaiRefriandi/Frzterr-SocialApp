@@ -54,4 +54,11 @@
         <item name="postSplashScreenTheme">@style/Theme.Frzterr</item>
     </style>
 
+    <!-- Custom Dialog Animation (Zoom/Scale) -->
+    <!-- Custom Dialog Animation (Zoom/Scale) -->
+    <style name="DialogAnimation_Zoom">
+        <item name="android:windowEnterAnimation">@anim/dialog_zoom_enter</item>
+        <item name="android:windowExitAnimation">@anim/dialog_zoom_exit</item>
+    </style>
+
 </resources>

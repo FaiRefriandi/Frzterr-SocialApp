@@ -108,20 +108,13 @@
             android:layout_marginStart="51dp"
             android:padding="4dp"/>
 
-        <!-- POST IMAGE CAROUSEL -->
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginStart="52dp"
-            android:clipChildren="false"
-            android:clipToPadding="false">
-
             <!-- SINGLE IMAGE: Adaptive Height (Original Ratio) -->
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="52dp">
 
                 <com.facebook.shimmer.ShimmerFrameLayout
                     android:id="@+id/shimmerSingle"
@@ -153,10 +146,11 @@
                 android:id="@+id/layoutCarousel"
                 android:layout_width="match_parent"
                 android:layout_height="240dp"
+                android:layout_marginTop="8dp"
                 android:visibility="gone"
                 android:clipChildren="false"
                 android:clipToPadding="false"
-                android:layout_marginStart="-68dp"
+                android:layout_marginStart="-16dp"
                 android:layout_marginEnd="-16dp">
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -175,7 +169,6 @@
                     app:layout_constraintBottom_toBottomOf="parent" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
-        </RelativeLayout>
 
         <!-- ACTION BUTTONS -->
         <LinearLayout

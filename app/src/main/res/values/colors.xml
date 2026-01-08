@@ -12,4 +12,7 @@
     <color name="like_active">#E91E63</color>
     <color name="icon_inactive">#808080</color>
     <color name="button_dark">#333333</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="border_subtle">#3F3F3F</color>
+    <color name="colorAccent">#1DA1F2</color>
 </resources>

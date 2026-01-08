@@ -4,15 +4,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.ViewCompat
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.frzterr.app.R
 import com.google.android.material.imageview.ShapeableImageView
 
 class PostImageAdapter(
-    private val images: List<String>,
     private val onImageClick: (Int, View) -> Unit
-) : RecyclerView.Adapter<PostImageAdapter.ViewHolder>() {
+) : ListAdapter<String, PostImageAdapter.ViewHolder>(ImageDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -21,10 +22,8 @@ class PostImageAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(images[position])
+        holder.bind(getItem(position))
     }
-
-    override fun getItemCount(): Int = images.size
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imgPost: ShapeableImageView = itemView.findViewById(R.id.imgPost)
@@ -61,5 +60,10 @@ class PostImageAdapter(
                 }
             }
         }
+    }
+
+    class ImageDiffCallback : DiffUtil.ItemCallback<String>() {
+        override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+        override fun areContentsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
     }
 }

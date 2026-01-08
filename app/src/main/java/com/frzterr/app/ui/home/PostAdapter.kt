@@ -19,6 +19,7 @@ import java.util.Locale
 
 class PostAdapter(
     private val currentUserId: String?,
+    private val contextType: String = "default", // Context for state isolation (e.g. "home", "profile")
     private val onLikeClick: (PostWithUser) -> Unit,
     private val onCommentClick: (PostWithUser) -> Unit,
     private val onRepostClick: (PostWithUser) -> Unit,
@@ -28,8 +29,12 @@ class PostAdapter(
     private val onImageClick: (List<String>, Int, View) -> Unit
 ) : ListAdapter<PostWithUser, PostAdapter.PostViewHolder>(PostDiffCallback()) {
 
+    // Carousel positions now stored in HomeViewModel companion object (app-wide persistence)
 
-
+    override fun onViewRecycled(holder: PostViewHolder) {
+        super.onViewRecycled(holder)
+        holder.cleanup()
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -53,10 +58,62 @@ class PostAdapter(
         private val btnRepost: ImageView = itemView.findViewById(R.id.btnRepost)
         private val tvRepostCount: TextView = itemView.findViewById(R.id.tvRepostCount)
         private val btnOption: ImageView = itemView.findViewById(R.id.btnOption)
+        private val rvPostImages: RecyclerView = itemView.findViewById(R.id.rvPostImages)
+        
+        private var currentPostId: String? = null
+
+        init {
+            // Setup Horizontal RecyclerView once
+            rvPostImages.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+                itemView.context,
+                androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
+                false
+            )
+
+            // Fix ViewPager2 Conflict with Vertical Scroll Support
+            rvPostImages.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
+                private var startX = 0f
+                private var startY = 0f
+
+                override fun onInterceptTouchEvent(rv: RecyclerView, e: android.view.MotionEvent): Boolean {
+                    when (e.action) {
+                        android.view.MotionEvent.ACTION_DOWN -> {
+                            startX = e.x
+                            startY = e.y
+                            rv.parent?.requestDisallowInterceptTouchEvent(true) // Lock initially
+                        }
+                        android.view.MotionEvent.ACTION_MOVE -> {
+                            val dx = Math.abs(e.x - startX)
+                            val dy = Math.abs(e.y - startY)
+
+                            // If vertical scroll is dominant, release the lock so parent can scroll
+                            if (dy > dx) {
+                                rv.parent?.requestDisallowInterceptTouchEvent(false)
+                            }
+                        }
+                        android.view.MotionEvent.ACTION_UP,
+                        android.view.MotionEvent.ACTION_CANCEL -> {
+                            rv.parent?.requestDisallowInterceptTouchEvent(false)
+                        }
+                    }
+                    return false
+                }
+                override fun onTouchEvent(rv: RecyclerView, e: android.view.MotionEvent) {}
+                override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
+            })
+        }
 
         fun bind(postWithUser: PostWithUser) {
             val post = postWithUser.post
             val user = postWithUser.user
+
+            // Save carousel state before binding new post
+            if (currentPostId != null && currentPostId != post.id && rvPostImages.visibility == View.VISIBLE) {
+                HomeViewModel.saveCarouselPosition(
+                    "${currentPostId}_$contextType", 
+                    rvPostImages.layoutManager?.onSaveInstanceState()
+                )
+            }
 
             // User info
             tvUsername.text = user.username
@@ -92,7 +149,6 @@ class PostAdapter(
             val layoutSingleContainer: View = imgPostSingle.parent as View // The FrameLayout wrapper
             
             val layoutCarousel: View = itemView.findViewById(R.id.layoutCarousel)
-            val rvPostImages: RecyclerView = itemView.findViewById(R.id.rvPostImages)
 
             val images = postWithUser.post.imageUrls
             
@@ -137,55 +193,82 @@ class PostAdapter(
                 layoutSingleContainer.visibility = View.GONE
                 layoutCarousel.visibility = View.VISIBLE
                 
-                // MULTI IMAGES - Use Recycler Carousel (Threads Style)
-                imgPostSingle.visibility = View.GONE
-                layoutCarousel.visibility = View.VISIBLE
-                
-                // FIXED HEIGHT CAROUSEL
-                // We removed the dynamic ratio calculation logic.
-                // The height is now fixed in XML (e.g., 250dp), and images adjust their width (wrap_content)
-                // to fit that height without cropping.
-                
-                // Setup Horizontal RecyclerView
-                rvPostImages.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
-                    itemView.context, 
-                    androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, 
-                    false
-                )
-                rvPostImages.adapter = PostImageAdapter(images) { position, view ->
-                    onImageClick(images, position, view)
+                // Setup adapter (create once, reuse forever for this ViewHolder)
+                if (rvPostImages.adapter == null) {
+                    val imageAdapter = PostImageAdapter { position, view ->
+                        val currentImages = (rvPostImages.adapter as? PostImageAdapter)?.currentList ?: emptyList()
+                        if (position < currentImages.size) {
+                            onImageClick(currentImages, position, view)
+                        }
+                    }
+                    rvPostImages.adapter = imageAdapter
                 }
                 
-                // Fix ViewPager2 Conflict with Vertical Scroll Support
-                rvPostImages.addOnItemTouchListener(object : RecyclerView.OnItemTouchListener {
-                    private var startX = 0f
-                    private var startY = 0f
-
-                    override fun onInterceptTouchEvent(rv: RecyclerView, e: android.view.MotionEvent): Boolean {
-                        when (e.action) {
-                            android.view.MotionEvent.ACTION_DOWN -> {
-                                startX = e.x
-                                startY = e.y
-                                rv.parent?.requestDisallowInterceptTouchEvent(true) // Lock initially
-                            }
-                            android.view.MotionEvent.ACTION_MOVE -> {
-                                val dx = Math.abs(e.x - startX)
-                                val dy = Math.abs(e.y - startY)
-                                
-                                // If vertical scroll is dominant, release the lock so parent can scroll
-                                if (dy > dx) {
-                                    rv.parent?.requestDisallowInterceptTouchEvent(false)
-                                }
-                            }
-                            android.view.MotionEvent.ACTION_UP, 
-                            android.view.MotionEvent.ACTION_CANCEL -> {
-                                rv.parent?.requestDisallowInterceptTouchEvent(false)
+                // Save carousel state before binding new post
+                if (currentPostId != null && currentPostId != post.id) {
+                    HomeViewModel.saveCarouselPosition(
+                        "${currentPostId}_$contextType", 
+                        rvPostImages.layoutManager?.onSaveInstanceState()
+                    )
+                }
+                
+                // ALWAYS update and reset position for GUARANTEED fresh state
+                // No conditions, no compromises - ensures refresh ALWAYS works
+                val isDifferentPost = currentPostId != post.id
+                
+                // For new/recycled views, hide content temporarily to prevent visual "jump"
+                if (isDifferentPost) {
+                     rvPostImages.alpha = 0f
+                }
+                
+                // Update current post ID
+                currentPostId = post.id
+                
+                // Check saved state BEFORE submitList
+                val savedState = HomeViewModel.getCarouselPosition("${post.id}_$contextType")
+                
+                // FORCE scroll to position (savedState or 0)
+                // This ensures EVERY bind resets carousel properly
+                rvPostImages.clearOnScrollListeners() // Clear first to prevent conflicts
+                
+                if (savedState == null) {
+                    // NO saved state = fresh start, scroll to 0 IMMEDIATELY
+                    rvPostImages.scrollToPosition(0)
+                } else {
+                    // Has saved state = restore position
+                    rvPostImages.post {
+                        rvPostImages.layoutManager?.onRestoreInstanceState(savedState)
+                    }
+                }
+                
+                // Update images for this post
+                (rvPostImages.adapter as? PostImageAdapter)?.submitList(images) {
+                    // Smoothly reveal the carousel after position is set
+                    if (rvPostImages.alpha < 1f) {
+                        rvPostImages.post {
+                            rvPostImages.animate()
+                                .alpha(1f)
+                                .setDuration(200)
+                                .start()
+                        }
+                    }
+                }
+                
+                // Setup real-time position tracking (once per post)
+                rvPostImages.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                    override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                        super.onScrollStateChanged(recyclerView, newState)
+                        // Save position immediately when user stops swiping
+                        if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                            val layoutManager = recyclerView.layoutManager
+                            if (layoutManager != null && currentPostId != null) {
+                                HomeViewModel.saveCarouselPosition(
+                                    "${currentPostId}_$contextType",
+                                    layoutManager.onSaveInstanceState()
+                                )
                             }
                         }
-                        return false
                     }
-                    override fun onTouchEvent(rv: RecyclerView, e: android.view.MotionEvent) {}
-                    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
                 })
             }
 
@@ -352,6 +435,18 @@ class PostAdapter(
                         .start()
                 }
                 .start()
+        }
+        fun cleanup() {
+            // Save carousel state when view is recycled
+            if (currentPostId != null && rvPostImages.visibility == View.VISIBLE) {
+                HomeViewModel.saveCarouselPosition(
+                    "${currentPostId}_$contextType", 
+                    rvPostImages.layoutManager?.onSaveInstanceState()
+                )
+            }
+            // Reset currentPostId so next bind treats it as a different post
+            // This ensures carousel resets work immediately on refresh
+            currentPostId = null
         }
     }
 

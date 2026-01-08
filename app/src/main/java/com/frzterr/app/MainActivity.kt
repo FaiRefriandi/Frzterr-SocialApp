@@ -46,14 +46,16 @@ class MainActivity : AppCompatActivity() {
 
             if (name != null || avatar != null) {
                 val vm: ProfileViewModel by viewModels()
-                vm.cachedUser = AppUser(
-                    id = "local",
-                    fullName = name,
-                    email = null,
-                    avatarUrl = avatar,
-                    provider = null,
-                    username = username ?: "",
-                    usernameLower = username?.lowercase() ?: ""
+                vm.updateUser(
+                    AppUser(
+                        id = "local",
+                        fullName = name,
+                        email = null,
+                        avatarUrl = avatar,
+                        provider = null,
+                        username = username ?: "",
+                        usernameLower = username?.lowercase() ?: ""
+                    )
                 )
             }
 
@@ -83,10 +85,10 @@ class MainActivity : AppCompatActivity() {
             val builder = androidx.navigation.NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)
-                .setEnterAnim(0)
-                .setExitAnim(0)
-                .setPopEnterAnim(0)
-                .setPopExitAnim(0)
+                .setEnterAnim(R.anim.slide_in_right)
+                .setExitAnim(R.anim.slide_out_left)
+                .setPopEnterAnim(R.anim.slide_in_left)
+                .setPopExitAnim(R.anim.slide_out_right)
 
             // Pop up to the start destination of the graph to
             // avoid building up a large stack of destinations
@@ -107,9 +109,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        bottomNav.setOnItemReselectedListener { item ->
+            if (item.itemId == R.id.homeFragment) {
+                 val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+                 val homeFragment = navHostFragment?.childFragmentManager?.fragments?.firstOrNull { 
+                     it is com.frzterr.app.ui.home.HomeFragment 
+                 } as? com.frzterr.app.ui.home.HomeFragment
+                 
+                 homeFragment?.scrollToTopAndRefresh()
+            }
+        }
+
         // Keep BottomNav selected item in sync with NavController (e.g. on Back press)
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            bottomNav.menu.findItem(destination.id)?.isChecked = true
+             if (destination.id == R.id.publicProfileFragment || destination.id == R.id.imageViewerFragment) {
+                 bottomNav.visibility = android.view.View.GONE
+             } else {
+                 bottomNav.visibility = android.view.View.VISIBLE
+                 bottomNav.menu.findItem(destination.id)?.isChecked = true
+             }
         }
     }
 

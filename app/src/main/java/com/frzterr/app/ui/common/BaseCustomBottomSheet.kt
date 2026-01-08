@@ -20,7 +20,7 @@ abstract class BaseCustomBottomSheet : Fragment() {
     abstract fun getLayoutResId(): Int
     abstract fun onSheetCreated(view: View)
 
-    private var behavior: BottomSheetBehavior<FrameLayout>? = null
+    protected var behavior: BottomSheetBehavior<FrameLayout>? = null
     private var scrim: View? = null
 
     override fun onCreateView(

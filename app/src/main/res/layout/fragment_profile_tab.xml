@@ -4,59 +4,45 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/scrollView"
+    <!-- Primary content is RecyclerView. Removed NestedScrollView to allow proper Scroll Restoration and Performance -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTabContent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:fillViewport="true">
+        android:scrollbars="none"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp"
+        android:overScrollMode="never"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+    <LinearLayout
+        android:id="@+id/emptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="center"
+        android:visibility="gone">
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvTabContent"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:scrollbars="none"
-                android:clipToPadding="false"
-                android:paddingBottom="80dp"
-                android:overScrollMode="never"
-                android:nestedScrollingEnabled="false"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        <TextView
+            android:id="@+id/tvEmptyMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Belum ada postingan"
+            android:textColor="#666666"
+            android:textSize="15sp"/>
+    </LinearLayout>
 
-            <LinearLayout
-                android:id="@+id/emptyState"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:gravity="center"
-                android:layout_gravity="center"
-                android:visibility="gone">
+    <!-- SHIMMER LOADING OVERLAY -->
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerViewContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:shimmer_duration="800">
 
-                <TextView
-                    android:id="@+id/tvEmptyMessage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Belum ada postingan"
-                    android:textColor="#666666"
-                    android:textSize="15sp"/>
-            </LinearLayout>
+        <include layout="@layout/shimmer_home_placeholder" />
 
-            <!-- SHIMMER LOADING -->
-            <com.facebook.shimmer.ShimmerFrameLayout
-                android:id="@+id/shimmerViewContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:visibility="gone"
-                app:shimmer_duration="800">
-
-                <include layout="@layout/shimmer_home_placeholder" />
-
-            </com.facebook.shimmer.ShimmerFrameLayout>
-
-        </FrameLayout>
-
-    </androidx.core.widget.NestedScrollView>
+    </com.facebook.shimmer.ShimmerFrameLayout>
 
 </FrameLayout>

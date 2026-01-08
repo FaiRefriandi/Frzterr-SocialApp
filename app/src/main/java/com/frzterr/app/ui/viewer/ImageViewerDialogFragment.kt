@@ -8,14 +8,24 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.ImageView
-import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.transition.ChangeBounds
+import androidx.transition.ChangeClipBounds
+import androidx.transition.ChangeImageTransform
+import androidx.transition.ChangeTransform
+import androidx.transition.Fade
+import androidx.transition.TransitionInflater
+import androidx.transition.TransitionSet
 import androidx.viewpager2.widget.ViewPager2
 import coil.load
+import coil.request.CachePolicy
+import coil.size.Precision
 import com.frzterr.app.R
 import com.github.chrisbanes.photoview.PhotoView
 
-class ImageViewerDialogFragment : DialogFragment() {
+class ImageViewerDialogFragment : Fragment() {
 
     companion object {
         private const val ARG_IMAGES = "arg_images"
@@ -30,16 +40,37 @@ class ImageViewerDialogFragment : DialogFragment() {
             fragment.arguments = args
             return fragment
         }
-        
-        // Convenience for single image (needed for compatibility or easy call)
-        fun newInstance(imageUrl: String): ImageViewerDialogFragment {
-            return newInstance(listOf(imageUrl), 0)
-        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setStyle(STYLE_NO_TITLE, android.R.style.Theme_Black_NoTitleBar_Fullscreen)
+        
+        // 🚀 ENTER TRANSITION (Zoom In)
+        val enterTransitionSet = androidx.transition.TransitionSet().apply {
+            addTransition(androidx.transition.ChangeBounds())
+            addTransition(androidx.transition.ChangeTransform())
+            addTransition(androidx.transition.ChangeImageTransform())
+            addTransition(androidx.transition.ChangeClipBounds())
+            duration = 300
+            interpolator = android.view.animation.DecelerateInterpolator()
+        }
+        
+        // 🚀 RETURN TRANSITION (Zoom Out) - Faster for smoothness
+        val returnTransitionSet = androidx.transition.TransitionSet().apply {
+            addTransition(androidx.transition.ChangeBounds())
+            addTransition(androidx.transition.ChangeTransform())
+            addTransition(androidx.transition.ChangeImageTransform())
+            addTransition(androidx.transition.ChangeClipBounds())
+            duration = 250
+            interpolator = android.view.animation.AccelerateInterpolator()
+        }
+        
+        sharedElementEnterTransition = enterTransitionSet
+        sharedElementReturnTransition = returnTransitionSet
+        
+        // Use Fade only for entering backdrop, don't use for exit to avoid flicker/stutter
+        enterTransition = Fade().apply { duration = 200 }
+        exitTransition = null 
     }
 
     override fun onCreateView(
@@ -47,18 +78,14 @@ class ImageViewerDialogFragment : DialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.activity_image_viewer, container, false)
+        val view = inflater.inflate(R.layout.activity_image_viewer, container, false)
+        view.setBackgroundColor(Color.BLACK)
+        return view
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // If shown as normal fragment (for Shared Element Transition), ensure background is set
-        // (Dialog usually handles window background, but Fragment needs view background)
-        if (!showsDialog) {
-            view.setBackgroundColor(Color.BLACK)
-        }
-
         val images = arguments?.getStringArrayList(ARG_IMAGES) ?: emptyList<String>()
         val startPosition = arguments?.getInt(ARG_POSITION, 0) ?: 0
         
@@ -90,23 +117,10 @@ class ImageViewerDialogFragment : DialogFragment() {
         }
     }
     
-    // Override dismiss to handle Fragment mode
-    override fun dismiss() {
-        if (showsDialog) {
-            super.dismiss()
-        } else {
-            parentFragmentManager.popBackStack()
-        }
-    }
-
-    override fun onStart() {
-        super.onStart()
-        dialog?.window?.apply {
-            setLayout(
-                WindowManager.LayoutParams.MATCH_PARENT,
-                WindowManager.LayoutParams.MATCH_PARENT
-            )
-            setBackgroundDrawable(ColorDrawable(Color.BLACK))
+    // Use popBackStack for proper navigation flow
+    fun dismiss() {
+        if (isAdded) {
+            findNavController().popBackStack()
         }
     }
 
@@ -132,7 +146,13 @@ class ImageViewerDialogFragment : DialogFragment() {
                 androidx.core.view.ViewCompat.setTransitionName(photoView, url)
                 
                 photoView.load(url) {
-                    crossfade(false) // Disable crossfade for smooth shared element transition
+                    crossfade(false)
+                    allowHardware(true)
+                    // Memory optimization for full screen images to avoid stuttering on return
+                    bitmapConfig(android.graphics.Bitmap.Config.RGB_565)
+                    precision(Precision.EXACT)
+                    diskCachePolicy(CachePolicy.ENABLED)
+                    
                     listener(
                         onSuccess = { _, _ ->
                             startPostponedEnterTransition()

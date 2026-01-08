@@ -11,8 +11,69 @@ import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
 
+    companion object {
+        // App-wide carousel position storage (survives navigation & config changes)
+        private val carouselPositions = mutableMapOf<String, android.os.Parcelable?>()
+        
+        // Flag to disable saving during refresh (prevents race conditions)
+        private var allowSavingPositions = true
+        
+        /**
+         * Save carousel position for a specific post
+         * Called by PostAdapter when carousel position changes
+         */
+        fun saveCarouselPosition(postId: String, state: android.os.Parcelable?) {
+            // Only save if allowed (not during refresh)
+            if (allowSavingPositions) {
+                carouselPositions[postId] = state
+            }
+        }
+        
+        /**
+         * Get saved carousel position for a specific post
+         * Returns null if no position saved yet
+         */
+        fun getCarouselPosition(postId: String): android.os.Parcelable? {
+            return carouselPositions[postId]
+        }
+        
+        /**
+         * Clear saved carousel positions
+         * @param contextType If provided, only clears positions for this context (e.g., "home"). 
+         *                    If null, clears ALL positions.
+         */
+        fun clearCarouselPositions(contextType: String? = null) {
+            // Disable saving first to prevent race conditions
+            allowSavingPositions = false
+            
+            if (contextType != null) {
+                // Clear only keys belonging to this context
+                val iterator = carouselPositions.iterator()
+                while (iterator.hasNext()) {
+                    val entry = iterator.next()
+                    if (entry.key.endsWith("_$contextType")) {
+                        iterator.remove()
+                    }
+                }
+            } else {
+                // Clear everything
+                carouselPositions.clear()
+            }
+        }
+        
+        /**
+         * Re-enable position saving after refresh is complete
+         */
+        fun enableSavingPositions() {
+            allowSavingPositions = true
+        }
+    }
+
     private val postRepo = PostRepository()
     private val authRepo = AuthRepository()
+
+    var lastImageClickTime: Long = 0L
+    private var hasInitialLoadCompleted = false
 
     private val _posts = MutableLiveData<List<PostWithUser>>()
     val posts: LiveData<List<PostWithUser>> = _posts
@@ -28,33 +89,51 @@ class HomeViewModel : ViewModel() {
     }
 
     fun loadPosts(showLoading: Boolean = true) {
+        // ALWAYS show loading on first load (cold start) or forced
+        val shouldShowLoading = showLoading || !hasInitialLoadCompleted
+        if (shouldShowLoading) {
+            _isLoading.value = true // ⚡ SET INSTANTLY
+        }
+
         viewModelScope.launch {
             try {
-                if (showLoading) {
-                    _isLoading.value = true
-                }
+                // If we forced loading above, ensure we don't double-set or unset prematurely
+                // The isLoading flag is already true if needed.
                 _error.value = null
 
-                // Retry mechanism for getCurrentUser (handle session loading race condition)
                 var currentUser = authRepo.getCurrentUser()
-                var retries = 0
-                while (currentUser == null && retries < 3) {
-                    kotlinx.coroutines.delay(300) // Wait for session to load
-                    currentUser = authRepo.getCurrentUser()
-                    retries++
+                
+                // If user not found, try to explicitly load/wait for session from storage
+                // This fixes the race condition where MainActivity is still loading session
+                if (currentUser == null) {
+                   authRepo.loadSession() // Suspending call - waits for disk/check
+                   currentUser = authRepo.getCurrentUser()
+                }
+
+                if (currentUser == null) {
+                     // Still null? Retry loop for slow devices
+                     var retries = 0
+                     while (currentUser == null && retries < 10) { // Retry up to ~5 seconds
+                        kotlinx.coroutines.delay(500)
+                        authRepo.loadSession()
+                        currentUser = authRepo.getCurrentUser()
+                        retries++
+                    }
                 }
                 
                 if (currentUser == null) {
                     // Session genuinely not available - likely actually logged out
-                    _error.value = null // Don't show error, let MainActivity handle redirect
+                    _error.value = null // Don't show error, let MainActivity redirect
                     return@launch
                 }
 
                 val fetchedPosts = postRepo.getAllPosts(currentUser.id)
                 _posts.value = fetchedPosts
+                hasInitialLoadCompleted = true
 
             } catch (e: Exception) {
                 _error.value = "Failed to load posts: ${e.message}"
+                hasInitialLoadCompleted = true
             } finally {
                 _isLoading.value = false
             }
@@ -101,7 +180,7 @@ class HomeViewModel : ViewModel() {
     }
 
     fun refresh() {
-        loadPosts(showLoading = false)
+        loadPosts(showLoading = true)
     }
 
     fun toggleRepost(postId: String, currentlyReposted: Boolean) {

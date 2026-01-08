@@ -1,5 +1,6 @@
 package com.frzterr.app.ui.comments
 
+import android.app.Dialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -11,24 +12,28 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import com.frzterr.app.R
 import com.frzterr.app.data.model.CommentWithUser
 import com.frzterr.app.data.repository.auth.AuthRepository
 import com.frzterr.app.data.repository.post.PostRepository
-import com.frzterr.app.ui.common.BaseEdgeToEdgeBottomSheetDialogFragment
+import com.frzterr.app.ui.comments.CommentAdapter
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import coil.load
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class CommentsBottomSheet(
     private val postId: String,
     private val postOwnerId: String,
-    private val onCommentAdded: () -> Unit = {}
-) : BaseEdgeToEdgeBottomSheetDialogFragment() {
+    private val onCommentAdded: () -> Unit = {},
+    private val onUserClick: (String, String?) -> Unit
+) : BottomSheetDialogFragment() {
 
-    private val postRepo = PostRepository()
+    val postRepo = PostRepository()
     private val authRepo = AuthRepository()
     private lateinit var adapter: CommentAdapter
 
@@ -39,7 +44,14 @@ class CommentsBottomSheet(
     private lateinit var btnSend: ImageView
     private lateinit var btnClose: ImageView
     
+    // Reply banner
+    private lateinit var replyBanner: android.widget.LinearLayout
+    private lateinit var imgReplyAvatar: com.google.android.material.imageview.ShapeableImageView
+    private lateinit var tvReplyingTo: android.widget.TextView
+    private lateinit var btnCancelReply: ImageView
+    
     private var replyToCommentId: String? = null
+    private var replyToUser: CommentWithUser? = null
     private var allComments: List<CommentWithUser> = emptyList()
     private val expandedCommentIds = mutableSetOf<String>()
 
@@ -51,15 +63,33 @@ class CommentsBottomSheet(
         return inflater.inflate(R.layout.bottom_sheet_comments, container, false)
     }
 
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
+        dialog.setOnShowListener {
+            val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.setBackgroundResource(android.R.color.transparent) // Fix white radius artifacts
+        }
+        return dialog
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
+        // Fix keyboard overlap
+        dialog?.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+
         rvComments = view.findViewById(R.id.rvComments)
         emptyState = view.findViewById(R.id.emptyState)
         shimmerViewContainer = view.findViewById(R.id.shimmerViewContainer)
         etComment = view.findViewById(R.id.etComment)
         btnSend = view.findViewById(R.id.btnSend)
         btnClose = view.findViewById(R.id.btnClose)
+        
+        // Reply banner
+        replyBanner = view.findViewById(R.id.replyBanner)
+        imgReplyAvatar = view.findViewById(R.id.imgReplyAvatar)
+        tvReplyingTo = view.findViewById(R.id.tvReplyingTo)
+        btnCancelReply = view.findViewById(R.id.btnCancelReply)
 
         setupAdapter()
         rvComments.adapter = adapter 
@@ -91,6 +121,11 @@ class CommentsBottomSheet(
                 addComment(content)
             }
         }
+        
+        // Cancel reply button
+        btnCancelReply.setOnClickListener {
+            hideReplyBanner()
+        }
     }
 
     private fun setupAdapter() {
@@ -102,7 +137,11 @@ class CommentsBottomSheet(
                 onLikeClick = { comment -> toggleLike(comment) },
                 onReplyClick = { comment -> replyComment(comment) },
                 onDeleteClick = { comment -> confirmDelete(comment) },
-                onReplyToggle = { commentId -> toggleReplyExpanded(commentId) }
+                onReplyToggle = { commentId -> toggleReplyExpanded(commentId) },
+                onUserClick = { comment ->
+                    dismiss()
+                    onUserClick(comment.user.id, comment.user.avatarUrl)
+                }
             )
             rvComments.adapter = adapter
         }
@@ -177,7 +216,7 @@ class CommentsBottomSheet(
 
                 if (result.isSuccess) {
                     etComment.text.clear()
-                    replyToCommentId = null 
+                    hideReplyBanner() // Clear reply state
                     Toast.makeText(requireContext(), "Komentar ditambahkan", Toast.LENGTH_SHORT).show()
                     
                     if (parentIdBeforeReset != null) {
@@ -246,6 +285,10 @@ class CommentsBottomSheet(
             val currentUser = authRepo.getCurrentUser()
             
             replyToCommentId = commentWithUser.comment.parentCommentId ?: commentWithUser.comment.id
+            replyToUser = commentWithUser
+            
+            // Show reply banner
+            showReplyBanner(commentWithUser)
             
             if (currentUser != null && currentUser.id != commentWithUser.comment.userId) {
                 val username = commentWithUser.user.username
@@ -259,6 +302,25 @@ class CommentsBottomSheet(
             val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
             imm.showSoftInput(etComment, android.view.inputmethod.InputMethodManager.SHOW_IMPLICIT)
         }
+    }
+    
+    private fun showReplyBanner(commentWithUser: CommentWithUser) {
+        replyBanner.visibility = View.VISIBLE
+        tvReplyingTo.text = "Replying to ${commentWithUser.user.username}"
+        
+        // Load avatar
+        imgReplyAvatar.load(commentWithUser.user.avatarUrl) {
+            crossfade(true)
+            placeholder(R.drawable.ic_user_placeholder)
+            error(R.drawable.ic_user_placeholder)
+        }
+    }
+    
+    private fun hideReplyBanner() {
+        replyBanner.visibility = View.GONE
+        replyToCommentId = null
+        replyToUser = null
+        etComment.setText("")
     }
 
     private fun confirmDelete(commentWithUser: CommentWithUser) {
