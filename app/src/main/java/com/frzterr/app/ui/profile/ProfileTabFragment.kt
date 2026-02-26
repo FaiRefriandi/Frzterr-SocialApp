@@ -72,6 +72,71 @@ class ProfileTabFragment : androidx.fragment.app.Fragment() {
                 bottomNav.translationY = newTranslation
             }
         })
+        
+        // 🔥 FIX: Enable horizontal swipe for image carousels within posts
+        // This allows the horizontal RecyclerView (image carousel) to capture horizontal swipes
+        // while still allowing ViewPager2 (tab switching) to work for large horizontal gestures
+        setupRecyclerViewTouchHandling()
+    }
+    
+    private fun setupRecyclerViewTouchHandling() {
+        recyclerView?.addOnItemTouchListener(object : RecyclerView.SimpleOnItemTouchListener() {
+            private var startX = 0f
+            private var startY = 0f
+            
+            override fun onInterceptTouchEvent(rv: RecyclerView, e: android.view.MotionEvent): Boolean {
+                when (e.action) {
+                    android.view.MotionEvent.ACTION_DOWN -> {
+                        startX = e.x
+                        startY = e.y
+                        
+                        // 🔥 Critical Fix: Aggressively prevent ViewPager2 from stealing event immediately
+                        // identifying if we are touching a carousel
+                        val childView = rv.findChildViewUnder(e.x, e.y)
+                        if (childView != null) {
+                            val carousel = childView.findViewById<RecyclerView>(R.id.rvPostImages)
+                            if (carousel != null && carousel.visibility == View.VISIBLE) {
+                                val rect = android.graphics.Rect()
+                                carousel.getGlobalVisibleRect(rect)
+                                if (rect.contains(e.rawX.toInt(), e.rawY.toInt())) {
+                                    rv.parent?.requestDisallowInterceptTouchEvent(true)
+                                }
+                            }
+                        }
+                    }
+                    android.view.MotionEvent.ACTION_MOVE -> {
+                        val dx = e.x - startX
+                        val dy = e.y - startY
+                        val isHorizontal = Math.abs(dx) > Math.abs(dy)
+                        
+                        if (isHorizontal) {
+                            val childView = rv.findChildViewUnder(e.x, e.y)
+                            if (childView != null) {
+                                val carousel = childView.findViewById<RecyclerView>(R.id.rvPostImages)
+                                if (carousel != null && carousel.visibility == View.VISIBLE) {
+                                    val rect = android.graphics.Rect()
+                                    carousel.getGlobalVisibleRect(rect)
+                                    if (rect.contains(e.rawX.toInt(), e.rawY.toInt())) {
+                                        // Scroll Direction: Swiping RIGHT (dx > 0) means scrolling BACK (-1)
+                                        // Swiping LEFT (dx < 0) means scrolling FORWARD (1)
+                                        val direction = if (dx > 0) -1 else 1
+                                        
+                                        if (carousel.canScrollHorizontally(direction)) {
+                                            // Carousel can scroll -> Keep parent LOCKED
+                                            rv.parent?.requestDisallowInterceptTouchEvent(true)
+                                        } else {
+                                            // Carousel at edge -> UNLOCK parent to allow tab switch
+                                            rv.parent?.requestDisallowInterceptTouchEvent(false)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return false
+            }
+        })
     }
 
     fun setAdapter(adapter: RecyclerView.Adapter<*>) {

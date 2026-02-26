@@ -227,6 +227,16 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                                 )
                             }
                         }
+                    },
+                    onVerificationClick = {
+                        val isAlreadyVerified = profileVM.user.value?.isVerified == true
+                        
+                        if (isAlreadyVerified) {
+                            Toast.makeText(requireContext(), "Ngapain? Akun kamu udah centang biru!", Toast.LENGTH_LONG).show()
+                        } else {
+                            profileVM.requestVerification()
+                            Toast.makeText(requireContext(), "Selamat akun anda telah berhasil terverifikasi!", Toast.LENGTH_LONG).show()
+                        }
                     }
                 ).show(requireActivity().supportFragmentManager, ProfileOptionsBottomSheet.TAG)
             }
@@ -823,6 +833,16 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
     private fun bindProfileText(user: AppUser) {
         // Nama panggilan
         binding.tvName.text = user.fullName ?: ""
+        
+        // Verified Badge
+        if (user.isVerified) {
+            val drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_verified_request)?.mutate()
+            drawable?.setBounds(0, 0, binding.tvName.textSize.toInt(), binding.tvName.textSize.toInt())
+            binding.tvName.setCompoundDrawables(null, null, drawable, null)
+            binding.tvName.compoundDrawablePadding = 8
+        } else {
+            binding.tvName.setCompoundDrawables(null, null, null, null)
+        }
 
         // Username dengan awalan @
         binding.tvUsername.text =

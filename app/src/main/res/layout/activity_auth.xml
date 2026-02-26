@@ -391,15 +391,6 @@
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"/>
         </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"/>
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

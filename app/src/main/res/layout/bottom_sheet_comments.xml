@@ -1,195 +1,229 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ROOT: Transparent & Match Parent Height to Fill Dialog Window -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/bg_bottom_sheet_rounded">
+    android:background="@android:color/transparent">
 
-    <!-- Handle Bar -->
+    <!-- SPACER: Fixed height from top (Acts as margin & dismiss area) -->
+    <!-- Adjust height (e.g., 50dp, 100dp) to control "Max Height" of sheet -->
     <View
-        android:layout_width="40dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="8dp"
-        android:background="#3A3A3A"
-        android:alpha="0.7"/>
-
-    <!-- HEADER -->
-    <LinearLayout
+        android:id="@+id/touchOutside"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="12dp">
+        android:layout_height="100dp"
+        android:background="@android:color/transparent"/>
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Komentar"
-            android:textColor="@android:color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"/>
-
-        <ImageView
-            android:id="@+id/btnClose"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:contentDescription="Tutup"
-            app:tint="#999999"/>
-    </LinearLayout>
-
-    <View
+    <!-- VISIBLE SHEET CONTENT: Fills remaining space -->
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#2A2A2A"/>
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@drawable/bg_bottom_sheet_rounded">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="280dp">
+        <!-- Handle Bar -->
+        <View
+            android:id="@+id/handleBar"
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="8dp"
+            android:background="#3A3A3A"
+            android:alpha="0.7"/>
 
-        <!-- COMMENTS LIST -->
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvComments"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
-
-        <!-- EMPTY STATE -->
+        <!-- HEADER -->
         <LinearLayout
-            android:id="@+id/emptyState"
-            android:layout_width="wrap_content"
+            android:id="@+id/headerContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:visibility="gone">
+            android:layout_below="@id/handleBar"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="12dp">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Belum ada komentar"
-                android:textColor="#666666"
-                android:textSize="15sp"/>
+                android:layout_weight="1"
+                android:text="Komentar"
+                android:textColor="@android:color/white"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Jadilah yang pertama berkomentar!"
-                android:textColor="#999999"
-                android:textSize="13sp"
-                android:layout_marginTop="4dp"/>
+            <ImageView
+                android:id="@+id/btnClose"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_close_clear_cancel"
+                android:contentDescription="Tutup"
+                app:tint="#999999"/>
         </LinearLayout>
 
-        <!-- SHIMMER LOADING -->
-        <com.facebook.shimmer.ShimmerFrameLayout
-            android:id="@+id/shimmerViewContainer"
+        <View
+            android:id="@+id/headerDivider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/headerContainer"
+            android:background="#2A2A2A"/>
+
+        <!-- INPUT AREA: PINNED TO BOTTOM -->
+        <LinearLayout
+            android:id="@+id/inputArea"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:orientation="vertical">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#2A2A2A"/>
+
+            <!-- REPLY BANNER -->
+            <LinearLayout
+                android:id="@+id/replyBanner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:background="#1A1A1A"
+                android:visibility="gone">
+
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/imgReplyAvatar"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:scaleType="centerCrop"
+                    app:shapeAppearanceOverlay="@style/CircleImageView"/>
+
+                <TextView
+                    android:id="@+id/tvReplyingTo"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:text="Replying to username"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp"
+                    android:singleLine="true"
+                    android:ellipsize="end"/>
+
+                <ImageView
+                    android:id="@+id/btnCancelReply"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@android:drawable/ic_menu_close_clear_cancel"
+                    android:contentDescription="Cancel reply"
+                    app:tint="#999999"
+                    android:background="?attr/selectableItemBackgroundBorderless"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#2A2A2A"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp">
+
+                <EditText
+                    android:id="@+id/etComment"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Tulis komentar..."
+                    android:textColorHint="#666666"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:background="@android:color/transparent"
+                    android:minHeight="40dp"
+                    android:maxLines="4"
+                    android:inputType="textMultiLine|textCapSentences"
+                    android:textCursorDrawable="@drawable/cursor_white"
+                    android:padding="8dp"/>
+
+                <ImageView
+                    android:id="@+id/btnSend"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_comment_send"
+                    android:contentDescription="Kirim komentar"
+                    app:tint="@color/white"
+                    android:layout_marginStart="8dp"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <!-- COMMENTS LIST CONTAINER: Fills space between Header and Input -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            app:shimmer_duration="800">
+            android:layout_below="@id/headerDivider"
+            android:layout_above="@id/inputArea">
 
-            <include layout="@layout/shimmer_comments_placeholder" />
+            <!-- COMMENTS LIST -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvComments"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:clipToPadding="false"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
 
-        </com.facebook.shimmer.ShimmerFrameLayout>
-    </FrameLayout>
+            <!-- EMPTY STATE -->
+            <LinearLayout
+                android:id="@+id/emptyState"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:visibility="gone">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#2A2A2A"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Belum ada komentar"
+                    android:textColor="#666666"
+                    android:textSize="15sp"/>
 
-    <!-- REPLY CONTEXT BANNER -->
-    <LinearLayout
-        android:id="@+id/replyBanner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:background="#1A1A1A"
-        android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Jadilah yang pertama berkomentar!"
+                    android:textColor="#999999"
+                    android:textSize="13sp"
+                    android:layout_marginTop="4dp"/>
+            </LinearLayout>
 
-        <com.google.android.material.imageview.ShapeableImageView
-            android:id="@+id/imgReplyAvatar"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/CircleImageView"/>
+            <!-- SHIMMER LOADING -->
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/shimmerViewContainer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:shimmer_duration="1500">
 
-        <TextView
-            android:id="@+id/tvReplyingTo"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="12dp"
-            android:text="Replying to username"
-            android:textColor="#AAAAAA"
-            android:textSize="13sp"
-            android:singleLine="true"
-            android:ellipsize="end"/>
+                <include layout="@layout/shimmer_comments_placeholder" />
 
-        <ImageView
-            android:id="@+id/btnCancelReply"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@android:drawable/ic_menu_close_clear_cancel"
-            android:contentDescription="Cancel reply"
-            app:tint="#999999"
-            android:background="?attr/selectableItemBackgroundBorderless"/>
-    </LinearLayout>
+            </com.facebook.shimmer.ShimmerFrameLayout>
+        </FrameLayout>
 
-    <!-- DIVIDER BEFORE INPUT -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#2A2A2A"/>
-
-    <!-- INPUT AREA -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:padding="12dp">
-
-        <EditText
-            android:id="@+id/etComment"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:hint="Tulis komentar..."
-            android:textColorHint="#666666"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:background="@android:color/transparent"
-            android:minHeight="40dp"
-            android:maxLines="4"
-            android:inputType="textMultiLine|textCapSentences"
-            android:padding="8dp"/>
-
-        <ImageView
-            android:id="@+id/btnSend"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@drawable/ic_comment_send"
-            android:contentDescription="Kirim komentar"
-            app:tint="@color/white"
-            android:layout_marginStart="8dp"
-            android:visibility="gone"/>
-    </LinearLayout>
-
+    </RelativeLayout>
 </LinearLayout>

@@ -7,12 +7,22 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="background">#101010</color>
-    <color name="bottomsheet">#1A1A1A</color>
+    <color name="background">#0D0D14</color>
+    <color name="bottomsheet">#13131F</color>
     <color name="like_active">#E91E63</color>
-    <color name="icon_inactive">#808080</color>
-    <color name="button_dark">#333333</color>
+    <color name="icon_inactive">#6B7280</color>
+    <color name="button_dark">#1E1E30</color>
     <color name="text_primary">#FFFFFF</color>
-    <color name="border_subtle">#3F3F3F</color>
+    <color name="border_subtle">#2A2A40</color>
     <color name="colorAccent">#1DA1F2</color>
+
+    <!-- Wallet Colors — Modern Violet/Indigo Palette -->
+    <color name="wallet_accent">#7C4DFF</color>
+    <color name="wallet_accent_light">#B388FF</color>
+    <color name="wallet_accent_dim">#1A7C4DFF</color>
+    <color name="wallet_card_bg">#13131F</color>
+    <color name="wallet_surface">#1A1A2E</color>
+    <color name="wallet_green">#00E676</color>
+    <color name="wallet_red">#FF5252</color>
+    <color name="wallet_seed_bg">#1A1A2E</color>
 </resources>

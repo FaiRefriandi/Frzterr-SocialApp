@@ -39,7 +39,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:shimmer_duration="800">
+        app:shimmer_duration="1500">
 
         <include layout="@layout/shimmer_home_placeholder" />
 

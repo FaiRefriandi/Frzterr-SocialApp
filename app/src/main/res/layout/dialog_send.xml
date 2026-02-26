@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ROOT: Transparent & Match Parent -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/transparent"
+    android:gravity="bottom">
+
+    <!-- VISIBLE CARD CONTENT -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_bottom_sheet_rounded"
+        android:backgroundTint="@color/background"
+        android:paddingBottom="32dp">
+
+        <!-- Handle -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/icon_inactive" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Send"
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="16dp"
+            android:paddingBottom="20dp" />
+
+        <!-- Coin Selector -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Asset"
+            android:textColor="@color/icon_inactive"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:layout_marginBottom="20dp"
+            android:paddingHorizontal="24dp"
+            android:clipToPadding="false">
+
+            <LinearLayout
+                android:id="@+id/layoutCoinSelector"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical" />
+        </HorizontalScrollView>
+
+        <!-- Recipient Address -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recipient Address"
+            android:textColor="@color/icon_inactive"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <EditText
+            android:id="@+id/etRecipientAddress"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/bg_search_input"
+            android:backgroundTint="#18FFFFFF"
+            android:hint="Enter recipient address"
+            android:textColorHint="@color/icon_inactive"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:fontFamily="monospace"
+            android:paddingHorizontal="16dp"
+            android:inputType="text"
+            android:imeOptions="actionNext" />
+
+        <!-- Amount -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Amount"
+            android:textColor="@color/icon_inactive"
+            android:textSize="12sp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="8dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="8dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_search_input"
+            android:backgroundTint="#18FFFFFF"
+            android:paddingHorizontal="16dp">
+
+            <EditText
+                android:id="@+id/etAmount"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:hint="0.00"
+                android:textColorHint="@color/icon_inactive"
+                android:textColor="@color/text_primary"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:inputType="numberDecimal"
+                android:imeOptions="actionDone" />
+
+            <TextView
+                android:id="@+id/tvAmountSymbol"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="BTC"
+                android:textColor="@color/wallet_accent"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Balance & USD Value -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingHorizontal="24dp"
+            android:layout_marginBottom="24dp">
+
+            <TextView
+                android:id="@+id/tvSendBalance"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Balance: 0.00"
+                android:textColor="@color/icon_inactive"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/tvSendUsdValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="≈ $0.00"
+                android:textColor="@color/icon_inactive"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Send Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmSend"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="24dp"
+            android:text="Send"
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textAllCaps="false"
+            android:backgroundTint="@color/wallet_accent"
+            app:cornerRadius="16dp" />
+
+    </LinearLayout>
+
+</LinearLayout>

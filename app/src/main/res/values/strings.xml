@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">Flowzup</string>
+
+    <!-- Wallet -->
+    <string name="wallet_title">Wallet</string>
+    <string name="wallet_empty_title">No Wallet Yet</string>
+    <string name="wallet_empty_desc">Create a new wallet or import an existing one using your seed phrase.</string>
+    <string name="wallet_create">Create New Wallet</string>
+    <string name="wallet_import">Import Wallet</string>
+    <string name="wallet_address_label">Wallet Address</string>
+    <string name="wallet_balance_label">Balance</string>
+    <string name="wallet_seed_label">Seed Phrase</string>
+    <string name="wallet_seed_warning">⚠️ Never share your seed phrase with anyone. Keep it safe and private.</string>
+    <string name="wallet_tap_to_reveal">Tap to reveal</string>
+    <string name="wallet_create_title">Your New Wallet</string>
+    <string name="wallet_create_desc">Write down these 12 words in order and keep them somewhere safe. This is the only way to recover your wallet.</string>
+    <string name="wallet_saved_confirm">I have saved my seed phrase</string>
+    <string name="wallet_import_title">Import Wallet</string>
+    <string name="wallet_import_desc">Enter your 12 or 24 word seed phrase separated by spaces.</string>
+    <string name="wallet_import_hint">Enter seed phrase…</string>
+    <string name="wallet_import_btn">Import</string>
+    <string name="wallet_copied">Copied to clipboard!</string>
+    <string name="wallet_import_error">Invalid seed phrase. Please enter 12 or 24 words.</string>
+    <string name="wallet_delete">Remove Wallet</string>
+    <string name="wallet_delete_confirm">Are you sure you want to remove this wallet? Make sure you have saved your seed phrase before proceeding.</string>
+    <string name="wallet_receive">Receive</string>
+    <string name="wallet_send">Send</string>
 </resources>

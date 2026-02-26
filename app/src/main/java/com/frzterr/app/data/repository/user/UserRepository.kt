@@ -31,7 +31,10 @@ data class AppUser(
     @SerialName("username_lower")
     val usernameLower: String,
     
-    val bio: String? = null
+    val bio: String? = null,
+    
+    @SerialName("is_verified")
+    val isVerified: Boolean = false
 )
 
 // ============================================================================
@@ -198,6 +201,23 @@ class UserRepository {
         } catch (e: Exception) {
             Log.e("SUPABASE_USER_DB", "Error updating profile: ${e.message}", e)
             Log.e("SUPABASE_USER_DB", "Stack trace: ${e.stackTraceToString()}")
+            Result.failure(e)
+        }
+    }
+
+    suspend fun setVerified(userId: String, isVerified: Boolean): Result<Unit> = withContext(Dispatchers.IO) {
+        try {
+            val payload = mapOf(
+                "is_verified" to isVerified
+            )
+            postgrest["users"].update(payload) {
+                filter {
+                    eq("id", userId)
+                }
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e("UserRepository", "Error setting verified status", e)
             Result.failure(e)
         }
     }

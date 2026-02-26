@@ -39,6 +39,7 @@ class UserSearchAdapter(
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val imgAvatar: ShapeableImageView = itemView.findViewById(R.id.imgAvatar)
+        private val shimmerAvatar: com.facebook.shimmer.ShimmerFrameLayout = itemView.findViewById(R.id.shimmerAvatar)
         private val tvUsername: TextView = itemView.findViewById(R.id.tvUsername)
         private val tvFullName: TextView = itemView.findViewById(R.id.tvFullName)
         private val btnRemove: ImageView = itemView.findViewById(R.id.btnRemove)
@@ -47,9 +48,23 @@ class UserSearchAdapter(
             tvUsername.text = user.username ?: ""
             tvFullName.text = user.fullName ?: ""
             
+            shimmerAvatar.visibility = View.VISIBLE
+            shimmerAvatar.startShimmer()
+            
             imgAvatar.load(user.avatarUrl) {
                 crossfade(true)
-                placeholder(R.drawable.ic_user_placeholder)
+                listener(
+                    onSuccess = { _, _ ->
+                        shimmerAvatar.stopShimmer()
+                        shimmerAvatar.visibility = View.GONE
+                    },
+                    onError = { _, _ ->
+                        shimmerAvatar.stopShimmer()
+                        shimmerAvatar.visibility = View.GONE
+                        // Optional: Show fallback if needed, but user didn't ask for specific fallback logic
+                        imgAvatar.setImageResource(R.drawable.ic_user_placeholder) 
+                    }
+                )
                 error(R.drawable.ic_user_placeholder)
             }
             
@@ -64,9 +79,22 @@ class UserSearchAdapter(
             tvUsername.text = recent.username
             tvFullName.text = recent.fullName ?: ""
             
+            shimmerAvatar.visibility = View.VISIBLE
+            shimmerAvatar.startShimmer()
+
             imgAvatar.load(recent.avatarUrl) {
                 crossfade(true)
-                placeholder(R.drawable.ic_user_placeholder)
+                listener(
+                    onSuccess = { _, _ ->
+                        shimmerAvatar.stopShimmer()
+                        shimmerAvatar.visibility = View.GONE
+                    },
+                    onError = { _, _ ->
+                        shimmerAvatar.stopShimmer()
+                        shimmerAvatar.visibility = View.GONE
+                        imgAvatar.setImageResource(R.drawable.ic_user_placeholder)
+                    }
+                )
                 error(R.drawable.ic_user_placeholder)
             }
             

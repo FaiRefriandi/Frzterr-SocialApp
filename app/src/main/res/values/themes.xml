@@ -19,6 +19,9 @@
 
         <!-- Bottom navigation custom -->
         <item name="bottomNavigationStyle">@style/Frzterr.BottomNav</item>
+        
+        <!-- Bottom Sheet Dialog Theme -->
+        <item name="bottomSheetDialogTheme">@style/Frzterr.BottomSheetDialog</item>
     </style>
 
 
@@ -29,12 +32,13 @@
 
     <!-- BOTTOM SHEET DIALOG THEME -->
     <!-- BOTTOM SHEET DIALOG THEME -->
+    <!-- BOTTOM SHEET DIALOG THEME -->
     <style name="Frzterr.BottomSheetDialog" parent="Theme.MaterialComponents.DayNight.BottomSheetDialog">
         <item name="bottomSheetStyle">@style/Widget.MaterialComponents.BottomSheet.Modal</item>
-        <!-- Ensure text appearance attributes are present -->
-        <item name="textAppearanceBody1">@style/TextAppearance.MaterialComponents.Body1</item>
-        <item name="textAppearanceBody2">@style/TextAppearance.MaterialComponents.Body2</item>
-        <item name="textInputStyle">@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox</item>
+        <item name="android:windowSoftInputMode">adjustResize</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/bottomsheet</item>
     </style>
 
 

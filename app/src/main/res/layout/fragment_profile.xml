@@ -55,6 +55,7 @@
                         android:layout_width="90dp"
                         android:layout_height="90dp"
                         app:shimmer_auto_start="false"
+                        app:shimmer_duration="1500"
                         android:visibility="gone">
                         
                         <com.google.android.material.imageview.ShapeableImageView

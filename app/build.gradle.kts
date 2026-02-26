@@ -18,6 +18,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters += listOf("arm64-v8a", "x86_64")
+        }
     }
 
     buildTypes {
@@ -120,4 +123,13 @@ dependencies {
 
     // PhotoView for Zoomable ImageView
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
+
+    // Trust Wallet Core
+    implementation("com.trustwallet:wallet-core:4.6.0")
+
+    // Chart library untuk harga crypto
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+
+    // QR Code generator untuk fitur Receive
+    implementation("com.google.zxing:core:3.5.2")
 }

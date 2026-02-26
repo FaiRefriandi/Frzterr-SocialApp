@@ -59,6 +59,16 @@ class CommentAdapter(
             val user = commentWithUser.user
 
             tvUsername.text = user.username // Remove @ prefix
+            
+            // Verified Badge
+            if (user.isVerified) {
+                val drawable = androidx.core.content.ContextCompat.getDrawable(itemView.context, R.drawable.ic_verified_request)?.mutate()
+                drawable?.setBounds(0, 0, tvUsername.textSize.toInt(), tvUsername.textSize.toInt())
+                tvUsername.setCompoundDrawables(null, null, drawable, null)
+                tvUsername.compoundDrawablePadding = 8
+            } else {
+                tvUsername.setCompoundDrawables(null, null, null, null)
+            }
             tvContent.text = comment.content
             tvTimestamp.text = formatTimestamp(comment.createdAt)
 
@@ -75,7 +85,7 @@ class CommentAdapter(
                 error(R.drawable.ic_user_placeholder)
                 listener(
                     onSuccess = { _, _ ->
-                        shimmerAvatar.stopShimmer()
+                            shimmerAvatar.stopShimmer()
                         shimmerAvatar.visibility = View.GONE
                     },
                     onError = { _, _ ->

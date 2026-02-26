@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- ROOT: Transparent & Match Parent -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/transparent"
+    android:gravity="bottom">
+
+    <!-- VISIBLE CARD CONTENT -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="@drawable/bg_bottom_sheet_rounded"
+        android:backgroundTint="@color/background"
+        android:paddingBottom="32dp">
+
+        <!-- Handle -->
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="4dp"
+            android:background="@color/icon_inactive" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Receive"
+            android:textColor="@color/text_primary"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_gravity="center_horizontal"
+            android:paddingTop="16dp"
+            android:paddingBottom="8dp" />
+
+        <!-- Chain Tabs -->
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabChain"
+            android:layout_width="match_parent"
+            android:layout_height="44dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="8dp"
+            app:tabMode="fixed"
+            app:tabGravity="fill"
+            app:tabSelectedTextColor="@color/wallet_accent"
+            app:tabTextColor="@color/icon_inactive"
+            app:tabIndicatorColor="@color/wallet_accent"
+            app:tabIndicatorHeight="2dp"
+            app:tabBackground="@android:color/transparent" />
+
+        <!-- Warning Label -->
+        <TextView
+            android:id="@+id/tvWarning"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginHorizontal="24dp"
+            android:layout_marginBottom="16dp"
+            android:text=""
+            android:textColor="#FFA726"
+            android:textSize="12sp"
+            android:gravity="center" />
+
+        <!-- QR Code -->
+        <ImageView
+            android:id="@+id/ivQrCode"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:layout_gravity="center_horizontal"
+            android:padding="8dp"
+            android:background="#FFFFFFFF"
+            android:layout_marginBottom="20dp" />
+
+        <!-- Address Box -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/bg_search_input"
+            android:backgroundTint="#18FFFFFF"
+            android:layout_marginHorizontal="24dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="12dp">
+
+            <TextView
+                android:id="@+id/tvReceiveAddress"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:fontFamily="monospace"
+                android:ellipsize="middle"
+                android:singleLine="true" />
+
+            <ImageButton
+                android:id="@+id/btnCopyReceiveAddress"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_action_copy"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:tint="@color/wallet_accent"
+                android:padding="4dp"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

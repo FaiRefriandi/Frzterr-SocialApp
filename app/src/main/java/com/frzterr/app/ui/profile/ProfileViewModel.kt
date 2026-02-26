@@ -374,6 +374,28 @@ class ProfileViewModel : ViewModel() {
         }
     }
 
+    fun requestVerification() {
+        viewModelScope.launch {
+            try {
+                val currentUser = _user.value ?: return@launch
+                
+                // ⚡ INSTANT Optimistic Update
+                val verifiedUser = currentUser.copy(isVerified = true)
+                _user.value = verifiedUser
+                
+                // Save to DB
+                val result = userRepo.setVerified(currentUser.id, true)
+                
+                if (result.isFailure) {
+                    _user.value = currentUser.copy(isVerified = false) // Revert on failure
+                }
+            } catch (e: Exception) {
+                // Revert on failure
+                _user.value = _user.value?.copy(isVerified = false)
+            }
+        }
+    }
+
     fun updateUser(updatedUser: AppUser?) {
         _user.value = updatedUser
     }

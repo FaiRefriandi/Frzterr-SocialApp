@@ -466,7 +466,6 @@ class AuthActivity : AppCompatActivity() {
     }
 
     private fun setLoading(loading: Boolean) = with(binding) {
-        progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         root.isEnabled = !loading
     }
 

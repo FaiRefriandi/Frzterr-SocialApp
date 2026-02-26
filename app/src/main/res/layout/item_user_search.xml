@@ -9,14 +9,33 @@
     android:paddingEnd="16dp"
     android:paddingTop="12dp"
     android:paddingBottom="12dp"
-    android:background="?attr/selectableItemBackground">
+    android:background="@drawable/selector_item_background"
+    android:clickable="true"
+    android:focusable="true">
 
-    <com.google.android.material.imageview.ShapeableImageView
-        android:id="@+id/imgAvatar"
+    <FrameLayout
         android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/CircleImageView"/>
+        android:layout_height="48dp">
+
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmerAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:shimmer_auto_start="true">
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/bg_shimmer_circle"/>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/imgAvatar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            app:shapeAppearanceOverlay="@style/CircleImageView"/>
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="0dp"

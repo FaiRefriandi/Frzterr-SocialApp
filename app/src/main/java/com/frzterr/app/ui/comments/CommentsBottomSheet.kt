@@ -67,17 +67,42 @@ class CommentsBottomSheet(
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
         dialog.setOnShowListener {
             val bottomSheet = dialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            bottomSheet?.setBackgroundResource(android.R.color.transparent) // Fix white radius artifacts
+            bottomSheet?.setBackgroundResource(android.R.color.transparent)
+            
+            // Force MATCH_PARENT height for the bottom sheet definition to allow internal resizing
+            val displayMetrics = resources.displayMetrics
+            bottomSheet?.layoutParams?.height = ViewGroup.LayoutParams.MATCH_PARENT
+            
+            // Force expanded state
+            dialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
+            dialog.behavior.skipCollapsed = true
+            dialog.behavior.isDraggable = true // Enable native drag to dismiss
         }
+        
+        // Disable edge-to-edge and set solid navigation bar color
+        dialog.window?.let { window ->
+            // Disable edge-to-edge mode (prevents transparency)
+            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
+            
+            val navBarColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.bottomsheet)
+            window.navigationBarColor = navBarColor
+            window.statusBarColor = navBarColor
+            
+            // Clear any transparency flags
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
+        }
+        
+        // Apply adjustResize
+        dialog.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        
         return dialog
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Fix keyboard overlap
-        dialog?.window?.setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-
         rvComments = view.findViewById(R.id.rvComments)
         emptyState = view.findViewById(R.id.emptyState)
         shimmerViewContainer = view.findViewById(R.id.shimmerViewContainer)
@@ -97,6 +122,10 @@ class CommentsBottomSheet(
         loadComments()
 
         btnClose.setOnClickListener {
+            dismiss()
+        }
+        
+        view.findViewById<View>(R.id.touchOutside)?.setOnClickListener {
             dismiss()
         }
         
@@ -125,6 +154,21 @@ class CommentsBottomSheet(
         // Cancel reply button
         btnCancelReply.setOnClickListener {
             hideReplyBanner()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+
+        // Reapply navigation bar settings (critical for Android 15)
+        dialog?.window?.let { window ->
+            // Disable edge-to-edge mode
+            androidx.core.view.WindowCompat.setDecorFitsSystemWindows(window, true)
+
+            // Clear transparency flags
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
         }
     }
 
