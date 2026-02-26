@@ -1,9 +1,11 @@
 package com.frzterr.app.ui.common
 
+import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.activity.OnBackPressedCallback
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -19,6 +21,9 @@ abstract class BaseCustomBottomSheet : Fragment() {
 
     abstract fun getLayoutResId(): Int
     abstract fun onSheetCreated(view: View)
+
+    /** Override to true to prevent back press from closing the sheet */
+    open val persistOnBack: Boolean = false
 
     protected var behavior: BottomSheetBehavior<FrameLayout>? = null
     private var scrim: View? = null
@@ -69,26 +74,30 @@ abstract class BaseCustomBottomSheet : Fragment() {
             }
 
             override fun onSlide(bottomSheet: View, slideOffset: Float) {
-                // Fade scrim based on slide offset (0 to 1)
-                // Offset -1 is hidden, 0 is collapsed, 1 is expanded
-                // We want 0 alpha at hidden (-1), 1 alpha at expanded (0+?)
-                // Actually standard behavior: 
-                // offset > 0 (Expanded -> Collapsed? No).
-                // Just simple map: if offset >= -1.
-                // Simplified: Scrim visible if not hidden.
-                // Better: 
                 val alpha = if (slideOffset >= 0) 1f else (1f + slideOffset)
                 scrim?.alpha = alpha
             }
         })
 
-        // Dismiss on Scrim Click
-        scrim?.setOnClickListener { dismiss() }
+        // Scrim click: tutup keyboard dulu jika terbuka, baru dismiss
+        scrim?.setOnClickListener {
+            if (isImeVisible()) {
+                hideKeyboard()
+            } else {
+                dismiss()
+            }
+        }
 
-        // Handle Back Press
+        // Back press: tutup keyboard dulu jika terbuka, baru dismiss (kalau persistOnBack=false)
         requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                dismiss()
+                if (isImeVisible()) {
+                    // Keyboard terbuka → tutup keyboard dulu, sheet tetap buka
+                    hideKeyboard()
+                } else if (!persistOnBack) {
+                    dismiss()
+                }
+                // persistOnBack=true & keyboard tidak terbuka → konsumsi event tanpa apa-apa
             }
         })
 
@@ -100,6 +109,18 @@ abstract class BaseCustomBottomSheet : Fragment() {
             scrim?.animate()?.alpha(1f)?.setDuration(200)?.start()
             behavior?.state = BottomSheetBehavior.STATE_EXPANDED
         }
+    }
+
+    /** Cek apakah keyboard (IME) sedang terbuka */
+    private fun isImeVisible(): Boolean {
+        val insets = ViewCompat.getRootWindowInsets(requireView()) ?: return false
+        return insets.isVisible(WindowInsetsCompat.Type.ime())
+    }
+
+    /** Sembunyikan keyboard */
+    private fun hideKeyboard() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(requireView().windowToken, 0)
     }
 
     fun dismiss() {

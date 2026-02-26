@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Skeleton item untuk saat harga/saldo sedang loading -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="20dp"
+    android:paddingVertical="14dp">
+
+    <!-- Icon skeleton -->
+    <View
+        android:layout_width="46dp"
+        android:layout_height="46dp"
+        android:background="@drawable/bg_circle_button"
+        android:backgroundTint="#20FFFFFF" />
+
+    <!-- Left skeleton -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="14dp">
+
+        <!-- Symbol skeleton -->
+        <View
+            android:layout_width="60dp"
+            android:layout_height="14dp"
+            android:layout_marginBottom="6dp"
+            android:background="@drawable/bg_bottom_sheet_rounded"
+            android:backgroundTint="#20FFFFFF" />
+
+        <!-- Price skeleton -->
+        <View
+            android:layout_width="110dp"
+            android:layout_height="11dp"
+            android:background="@drawable/bg_bottom_sheet_rounded"
+            android:backgroundTint="#15FFFFFF" />
+    </LinearLayout>
+
+    <!-- Right skeleton -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="end">
+
+        <!-- Balance skeleton -->
+        <View
+            android:layout_width="70dp"
+            android:layout_height="14dp"
+            android:layout_marginBottom="6dp"
+            android:background="@drawable/bg_bottom_sheet_rounded"
+            android:backgroundTint="#20FFFFFF" />
+
+        <!-- Value skeleton -->
+        <View
+            android:layout_width="50dp"
+            android:layout_height="11dp"
+            android:background="@drawable/bg_bottom_sheet_rounded"
+            android:backgroundTint="#15FFFFFF" />
+    </LinearLayout>
+
+</LinearLayout>

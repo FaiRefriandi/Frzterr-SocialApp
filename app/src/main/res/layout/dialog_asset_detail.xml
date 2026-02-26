@@ -97,7 +97,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Balance"
+                android:text="Saldo"
                 android:textColor="@color/icon_inactive"
                 android:textSize="12sp" />
 
@@ -120,7 +120,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Value (USD)"
+                android:text="Harga (USD)"
                 android:textColor="@color/icon_inactive"
                 android:textSize="12sp" />
 
@@ -187,7 +187,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Wallet Address"
+            android:text="Alamat Dompet"
             android:textColor="@color/icon_inactive"
             android:textSize="12sp"
             android:layout_marginBottom="6dp" />

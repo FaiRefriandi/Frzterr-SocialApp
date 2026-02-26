@@ -12,134 +12,124 @@
         android:layout_height="match_parent"
         android:visibility="visible">
 
-        <!-- ── Floating decorative coin icons ── -->
-        <!-- Top-left: BTC -->
-        <FrameLayout
-            android:id="@+id/floatBtc"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:background="@drawable/bg_circle_button"
-            android:backgroundTint="#FF1A1A2E"
+        <!-- ── Arc container: fixed 200dp, 28dp away from status bar ── -->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/arcContainer"
+            android:layout_width="match_parent"
+            android:layout_height="240dp"
+            android:layout_marginTop="0dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="60dp"
-            android:layout_marginStart="32dp">
-            <ImageView
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_btc" />
-        </FrameLayout>
+            app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- Top-right: ETH -->
-        <FrameLayout
-            android:id="@+id/floatEth"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:background="@drawable/bg_circle_button"
-            android:backgroundTint="#FF1A1A2E"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="80dp"
-            android:layout_marginEnd="40dp">
-            <ImageView
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_eth" />
-        </FrameLayout>
+            <!-- BTC: puncak tengah – arc(90°) R=115dp -->
+            <!-- center=(50%, 85dp) → Hb=0.5, Vb=85/200=0.425 -->
+            <FrameLayout
+                android:id="@+id/floatBtc"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_circle_button"
+                android:backgroundTint="#FF1A1A2E"
+                android:elevation="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintVertical_bias="0.351">
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_btc" />
+            </FrameLayout>
 
-        <!-- Top-center: SOL -->
-        <FrameLayout
-            android:id="@+id/floatSol"
-            android:layout_width="52dp"
-            android:layout_height="52dp"
-            android:background="@drawable/bg_circle_button"
-            android:backgroundTint="#FF1A1A2E"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="32dp"
-            android:layout_marginStart="40dp">
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_sol" />
-        </FrameLayout>
+            <!-- ETH: kiri atas – arc(122.5°) → Hb=0.328, Vb=0.515 -->
+            <FrameLayout
+                android:id="@+id/floatEth"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_circle_button"
+                android:backgroundTint="#FF1A1A2E"
+                android:elevation="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.248"
+                app:layout_constraintVertical_bias="0.467">
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_eth" />
+            </FrameLayout>
 
-        <!-- Mid-left: BNB -->
-        <FrameLayout
-            android:id="@+id/floatBnb"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/bg_circle_button"
-            android:backgroundTint="#FF1A1A2E"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="160dp"
-            android:layout_marginStart="12dp">
-            <ImageView
-                android:layout_width="28dp"
-                android:layout_height="28dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_bnb" />
-        </FrameLayout>
+            <!-- SOL: kanan atas – arc(57.5°) → Hb=0.672, Vb=0.515 -->
+            <FrameLayout
+                android:id="@+id/floatSol"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_circle_button"
+                android:backgroundTint="#FF1A1A2E"
+                android:elevation="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.752"
+                app:layout_constraintVertical_bias="0.467">
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_sol" />
+            </FrameLayout>
 
-        <!-- Mid-right: USDT -->
-        <FrameLayout
-            android:id="@+id/floatUsdt"
-            android:layout_width="54dp"
-            android:layout_height="54dp"
-            android:background="@drawable/bg_circle_button"
-            android:backgroundTint="#FF1A1A2E"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="150dp"
-            android:layout_marginEnd="14dp">
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center"
-                android:src="@drawable/ic_usdt" />
-        </FrameLayout>
+            <!-- BNB: kiri bawah – arc(155°) → Hb=0.211, Vb=0.757 -->
+            <FrameLayout
+                android:id="@+id/floatBnb"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_circle_button"
+                android:backgroundTint="#FF1A1A2E"
+                android:elevation="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.064"
+                app:layout_constraintVertical_bias="0.783">
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_bnb" />
+            </FrameLayout>
 
-        <!-- ── Sparkle decorations ── -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="✦"
-            android:textSize="18sp"
-            android:textColor="#7C4DFF"
-            android:alpha="0.7"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            android:layout_marginTop="140dp"
-            android:layout_marginStart="82dp" />
+            <!-- USDT: kanan bawah – arc(25°) → Hb=0.789, Vb=0.757 -->
+            <FrameLayout
+                android:id="@+id/floatUsdt"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:background="@drawable/bg_circle_button"
+                android:backgroundTint="#FF1A1A2E"
+                android:elevation="4dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.936"
+                app:layout_constraintVertical_bias="0.783">
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="center"
+                    android:src="@drawable/ic_usdt" />
+            </FrameLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="✦"
-            android:textSize="14sp"
-            android:textColor="#B388FF"
-            android:alpha="0.6"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="120dp"
-            android:layout_marginEnd="85dp" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="✦"
-            android:textSize="22sp"
-            android:textColor="#7C4DFF"
-            android:alpha="0.5"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="200dp"
-            android:layout_marginEnd="32dp" />
 
         <!-- ── Hero wallet icon (center) ── -->
         <FrameLayout
@@ -149,12 +139,12 @@
             android:background="@drawable/bg_circle_button"
             android:backgroundTint="#207C4DFF"
             android:elevation="8dp"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/arcContainer"
             app:layout_constraintBottom_toTopOf="@+id/tvWelcomeTitle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
-            app:layout_constraintVertical_bias="0.42">
+            app:layout_constraintVertical_bias="0.05">
 
             <ImageView
                 android:layout_width="72dp"
@@ -225,7 +215,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/wallet_import"
-            android:textColor="@color/wallet_accent"
+            android:textColor="@color/white"
             android:textSize="15sp"
             android:textAllCaps="false"
             android:textStyle="bold"
@@ -244,6 +234,7 @@
         android:layout_height="match_parent"
         android:visibility="gone"
         android:clipToPadding="false"
+        android:fitsSystemWindows="true"
         android:paddingBottom="88dp">
 
         <LinearLayout
@@ -256,30 +247,30 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingHorizontal="24dp"
-                android:paddingTop="20dp"
+                android:paddingTop="16dp"
                 android:paddingBottom="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="My Wallet"
-                    android:textSize="18sp"
+                    android:text="Wallet."
+                    android:fontFamily="@font/codega"
+                    android:textSize="24sp"
                     android:textStyle="bold"
                     android:textColor="@color/text_primary"
                     android:layout_centerVertical="true"
-                    android:letterSpacing="-0.01" />
+                    android:letterSpacing="0.1" />
 
                 <ImageButton
-                    android:id="@+id/btnDelete"
+                    android:id="@+id/btnMenu"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:src="@drawable/ic_action_delete"
-                    android:background="@drawable/bg_circle_button"
-                    android:backgroundTint="#18FF5252"
+                    android:src="@drawable/ic_more"
+                    android:background="?attr/selectableItemBackgroundBorderless"
                     android:padding="8dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:tint="#FF5252" />
+                    app:tint="#FFFFFF" />
             </RelativeLayout>
 
             <!-- ── Balance Card ── -->
@@ -296,7 +287,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Total Balance"
+                    android:text="Jumlah Saldo"
                     android:textColor="@color/icon_inactive"
                     android:textSize="13sp"
                     android:letterSpacing="0.05"
@@ -358,7 +349,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Send"
+                            android:text="Kirim"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp"
                             android:layout_marginTop="8dp" />
@@ -393,7 +384,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Receive"
+                            android:text="Terima"
                             android:textColor="@color/text_primary"
                             android:textSize="12sp"
                             android:layout_marginTop="8dp" />
@@ -419,16 +410,15 @@
                             <ImageView
                                 android:layout_width="22dp"
                                 android:layout_height="22dp"
-                                android:src="@drawable/ic_action_send"
+                                android:src="@drawable/ic_action_history"
                                 android:layout_gravity="center"
-                                android:tint="@color/icon_inactive"
-                                android:rotation="90" />
+                                android:tint="@color/icon_inactive" />
                         </FrameLayout>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="History"
+                            android:text="Riwayat"
                             android:textColor="@color/icon_inactive"
                             android:textSize="12sp"
                             android:layout_marginTop="8dp" />
@@ -441,7 +431,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Assets"
+                android:text="Aset"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold"

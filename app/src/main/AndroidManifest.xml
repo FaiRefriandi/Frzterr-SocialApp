@@ -50,19 +50,27 @@
             android:theme="@style/Theme.Frzterr"
             android:exported="false" />
 
-        <!-- MAIN APP -->
+        <!-- SPLASH SCREEN -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.splash.SplashActivity"
             android:screenOrientation="portrait"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.Frzterr.Splash">
+            android:theme="@style/Theme.Frzterr">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- MAIN APP -->
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.Frzterr" />
+
 
 
     </application>

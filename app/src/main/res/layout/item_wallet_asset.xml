@@ -9,7 +9,7 @@
     android:paddingVertical="14dp"
     android:background="?attr/selectableItemBackground">
 
-    <!-- Coin Icon with colored background -->
+    <!-- Coin Icon -->
     <FrameLayout
         android:layout_width="46dp"
         android:layout_height="46dp"
@@ -63,6 +63,7 @@
                 android:paddingVertical="2dp" />
         </LinearLayout>
 
+        <!-- Harga + % perubahan (shimmer saat loading) -->
         <TextView
             android:id="@+id/tvAssetPrice"
             android:layout_width="wrap_content"
@@ -80,6 +81,7 @@
         android:orientation="vertical"
         android:gravity="end">
 
+        <!-- Saldo token (shimmer saat loading) -->
         <TextView
             android:id="@+id/tvAssetBalance"
             android:layout_width="wrap_content"
@@ -90,6 +92,7 @@
             android:textStyle="bold"
             android:layout_marginBottom="3dp" />
 
+        <!-- Nilai USD (shimmer saat loading) -->
         <TextView
             android:id="@+id/tvAssetValue"
             android:layout_width="wrap_content"
