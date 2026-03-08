@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="280dp"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#0D0D14">
+
+    <!-- Drawer header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingTop="60dp"
+        android:paddingBottom="16dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Riwayat Chat"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <!-- New chat button -->
+        <ImageButton
+            android:id="@+id/btnNewChatDrawer"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_new_chat"
+            android:background="@drawable/bg_circle_button"
+            android:backgroundTint="#1A1A2E"
+            android:padding="8dp" />
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E2E"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Sessions list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvChatHistory"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingVertical="4dp" />
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1E1E2E"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Clear all -->
+    <LinearLayout
+        android:id="@+id/btnClearAll"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="20dp"
+        android:paddingBottom="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground">
+
+        <ImageView
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_trash"
+            android:tint="#888888"
+            android:layout_marginEnd="12dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Hapus semua riwayat"
+            android:textColor="#888888"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+</LinearLayout>

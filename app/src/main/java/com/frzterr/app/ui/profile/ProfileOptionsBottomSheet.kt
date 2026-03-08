@@ -7,7 +7,8 @@ import com.frzterr.app.ui.common.BaseCustomBottomSheet
 
 class ProfileOptionsBottomSheet(
     private val onLogoutClick: () -> Unit,
-    private val onVerificationClick: () -> Unit
+    private val onVerificationClick: () -> Unit,
+    private val onWalletClick: () -> Unit
 ) : BaseCustomBottomSheet() {
 
     override fun getLayoutResId(): Int = R.layout.bottom_sheet_profile_options
@@ -16,6 +17,10 @@ class ProfileOptionsBottomSheet(
         view.findViewById<LinearLayout>(R.id.btnRequestVerification).setOnClickListener {
             dismiss()
             onVerificationClick()
+        }
+        view.findViewById<LinearLayout>(R.id.btnWallet).setOnClickListener {
+            dismiss()
+            onWalletClick()
         }
         view.findViewById<LinearLayout>(R.id.btnLogout).setOnClickListener {
             dismiss()

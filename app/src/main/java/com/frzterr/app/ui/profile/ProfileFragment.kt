@@ -28,6 +28,7 @@ import com.frzterr.app.data.repository.user.AppUser
 import com.frzterr.app.data.repository.user.UserRepository
 import com.frzterr.app.databinding.FragmentProfileBinding
 import com.frzterr.app.ui.auth.AuthActivity
+import com.frzterr.app.utils.GoogleSignInHelper
 import com.yalantis.ucrop.UCrop
 import io.github.jan.supabase.storage.storage
 import kotlinx.coroutines.Dispatchers
@@ -237,6 +238,9 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                             profileVM.requestVerification()
                             Toast.makeText(requireContext(), "Selamat akun anda telah berhasil terverifikasi!", Toast.LENGTH_LONG).show()
                         }
+                    },
+                    onWalletClick = {
+                        findNavController().navigate(R.id.walletFragment)
                     }
                 ).show(requireActivity().supportFragmentManager, ProfileOptionsBottomSheet.TAG)
             }
@@ -291,7 +295,25 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
         // Repurpose Share Profile -> Message Button
         binding.btnShareProfile.text = "Pesan"
         binding.btnShareProfile.setOnClickListener {
-            Toast.makeText(requireContext(), "Fitur pesan segera hadir!", Toast.LENGTH_SHORT).show()
+            val currentUserId = authRepo.getCurrentUser()?.id ?: return@setOnClickListener
+            lifecycleScope.launch {
+                try {
+                    val repo = com.frzterr.app.data.repository.message.MessageRepository()
+                    val conv = repo.getOrCreateConversation(currentUserId, targetUserId)
+                        ?: throw Exception("Gagal membuat percakapan")
+                    val otherUserId = if (conv.user1Id == currentUserId) conv.user2Id else conv.user1Id
+                    val otherUser = profileVM.user.value
+                    val intent = Intent(requireContext(), com.frzterr.app.ui.message.ChatActivity::class.java).apply {
+                        putExtra(com.frzterr.app.ui.message.ChatActivity.EXTRA_CONVERSATION_ID, conv.id)
+                        putExtra(com.frzterr.app.ui.message.ChatActivity.EXTRA_OTHER_USER_ID, otherUserId)
+                        putExtra(com.frzterr.app.ui.message.ChatActivity.EXTRA_OTHER_USERNAME, otherUser?.fullName ?: "@${otherUser?.username}")
+                        putExtra(com.frzterr.app.ui.message.ChatActivity.EXTRA_OTHER_AVATAR_URL, otherUser?.avatarUrl)
+                    }
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Gagal membuka pesan: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
         
         // Hide "Add Bio" chip explicitly

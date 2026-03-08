@@ -15,6 +15,11 @@
         android:label="Explore" />
 
     <fragment
+        android:id="@+id/aiChatFragment"
+        android:name="com.frzterr.app.ui.aichat.AiChatFragment"
+        android:label="AI Chat" />
+
+    <fragment
         android:id="@+id/messageFragment"
         android:name="com.frzterr.app.ui.message.MessageFragment"
         android:label="Message" />

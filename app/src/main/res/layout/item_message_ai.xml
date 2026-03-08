@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="10dp">
+
+    <!-- AI identifier row -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="6dp">
+
+        <FrameLayout
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:background="@drawable/bg_circle_button"
+            android:backgroundTint="#1A1A1A"
+            android:layout_marginEnd="6dp">
+            <ImageView
+                android:id="@+id/ivModelIcon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_ai_star_bold"
+                android:tint="#7B8CFF" />
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/tvModelName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AI"
+            android:textColor="#888888"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- AI message text (plain, no bubble) -->
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#EEEEEE"
+        android:textSize="15sp"
+        android:lineSpacingExtra="4dp"
+        android:layout_marginEnd="40dp" />
+
+</LinearLayout>

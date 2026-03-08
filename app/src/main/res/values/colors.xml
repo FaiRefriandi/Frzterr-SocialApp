@@ -15,6 +15,9 @@
     <color name="text_primary">#FFFFFF</color>
     <color name="border_subtle">#2A2A40</color>
     <color name="colorAccent">#1DA1F2</color>
+    <color name="chip_select">#7B8CFF</color>
+    <color name="purple_btn">#5B36F5</color>
+
 
     <!-- Wallet Colors — Modern Violet/Indigo Palette -->
     <color name="wallet_accent">#7C4DFF</color>

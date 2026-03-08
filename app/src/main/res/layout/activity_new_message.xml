@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background">
+
+    <!-- ===================== TOOLBAR ===================== -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/toolbar"
+        android:layout_width="0dp"
+        android:layout_height="56dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <!-- Back button -->
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="6dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Back"
+            android:padding="8dp"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="New message"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivBack"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginStart="8dp"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- ===================== TO: SEARCH ROW ===================== -->
+    <LinearLayout
+        android:id="@+id/rowTo"
+        android:layout_width="0dp"
+        android:layout_height="52dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/toolbar">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:text="To:"
+            android:textColor="#9CA3AF"
+            android:textSize="15sp" />
+
+        <EditText
+            android:id="@+id/etSearch"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="Search"
+            android:inputType="text"
+            android:maxLines="1"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#6B7280"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <!-- Thin divider -->
+    <View
+        android:id="@+id/dividerSearch"
+        android:layout_width="0dp"
+        android:layout_height="0.5dp"
+        android:background="#2A2A40"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rowTo" />
+
+    <!-- ===================== SUGGESTED HEADER ===================== -->
+    <TextView
+        android:id="@+id/tvSuggestedHeader"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingStart="20dp"
+        android:paddingTop="20dp"
+        android:paddingBottom="10dp"
+        android:text="Suggested"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/dividerSearch" />
+
+    <!-- ===================== USER LIST ===================== -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvUsers"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:scrollbars="none"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSuggestedHeader" />
+
+    <!-- No results -->
+    <TextView
+        android:id="@+id/tvNoResults"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="No users found"
+        android:textColor="#6B7280"
+        android:textSize="14sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvSuggestedHeader" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

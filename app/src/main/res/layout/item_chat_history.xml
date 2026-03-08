@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <!-- Chat icon -->
+    <FrameLayout
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@drawable/bg_circle_button"
+        android:backgroundTint="#1A1A2E"
+        android:layout_marginEnd="12dp">
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_gravity="center"
+            android:src="@drawable/ic_ai_star_bold"
+            android:tint="#7B8CFF" />
+    </FrameLayout>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tvSessionTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:textColor="#CCCCCC"
+        android:textSize="13sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+
+</LinearLayout>

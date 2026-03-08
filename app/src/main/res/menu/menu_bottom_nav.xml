@@ -12,14 +12,14 @@
         android:icon="@drawable/nav_explore_icon" />
 
     <item
+        android:id="@+id/aiChatFragment"
+        android:title="AI"
+        android:icon="@drawable/nav_ai_icon" />
+
+    <item
         android:id="@+id/messageFragment"
         android:title="Message"
         android:icon="@drawable/nav_message_icon" />
-
-    <item
-        android:id="@+id/walletFragment"
-        android:title="Wallet"
-        android:icon="@drawable/nav_wallet_icon" />
 
     <item
         android:id="@+id/profileFragment"

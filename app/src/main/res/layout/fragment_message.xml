@@ -1,14 +1,206 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
-    android:gravity="center"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/background">
 
-    <TextView
-        android:text="Message Page"
-        android:textSize="24sp"
-        android:padding="16dp"
+    <!--
+        AppBarLayout dengan DUA anak:
+        1. LinearLayout (header + search) → TIDAK ada scrollFlags → SELALU TERLIHAT (PINNED)
+        2. LinearLayout (chips)           → scrollFlags=scroll|enterAlways   → IKUT SCROLL BERSAMA LIST
+    -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/background"
+        app:elevation="0dp">
+
+        <!-- ===== BAGIAN PINNED: Header + Search ===== -->
+        <LinearLayout
+            android:id="@+id/llPinnedHeader"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tvMessagesHeader"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/codega"
+                android:paddingStart="24dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="24dp"
+                android:paddingBottom="16dp"
+                android:text="Messages"
+                android:textColor="@android:color/white"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- Search Bar -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/cardSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="20dp"
+                android:layout_marginEnd="20dp"
+                android:layout_marginBottom="20dp"
+                app:hintEnabled="false"
+                app:placeholderText="Cari"
+                app:placeholderTextColor="#888888"
+                app:boxBackgroundMode="filled"
+                app:boxBackgroundColor="#2A2A2A"
+                app:boxStrokeWidth="0dp"
+                app:boxStrokeWidthFocused="0dp"
+                app:boxStrokeColor="@android:color/transparent"
+                app:cursorColor="@color/white"
+                app:boxCornerRadiusTopStart="14dp"
+                app:boxCornerRadiusTopEnd="14dp"
+                app:boxCornerRadiusBottomStart="14dp"
+                app:boxCornerRadiusBottomEnd="14dp"
+                app:startIconDrawable="@drawable/search_24"
+                app:startIconTint="#6B7280"
+                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etSearch"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Cari"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#888888"
+                    android:inputType="text"
+                    android:minHeight="48dp"
+                    android:paddingVertical="14dp"
+                    android:maxLines="1" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+        </LinearLayout>
+
+        <!-- ===== BAGIAN SCROLLABLE: Chips (ikut scroll bersama list) ===== -->
+        <LinearLayout
+            android:id="@+id/llFilters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingBottom="16dp"
+            android:orientation="horizontal"
+            app:layout_scrollFlags="scroll|enterAlways|snap">
+
+            <!-- Chip: Semua -->
+            <TextView
+                android:id="@+id/chipAll"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_chip_selected"
+                android:gravity="center"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:text="Semua"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <!-- Chip: Belum dibaca (dengan badge count) -->
+            <LinearLayout
+                android:id="@+id/chipUnread"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:background="@drawable/bg_chip_unselected"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="18dp"
+                android:paddingEnd="14dp">
+
+                <TextView
+                    android:id="@+id/tvChipUnreadLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Belum dibaca"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:id="@+id/tvUnreadBadgeCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:gravity="center"
+                    android:minWidth="18dp"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:textColor="#AAAAAA"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- ===== KONTEN UTAMA ===== -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <!-- Conversation List -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvConversations"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="100dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager" />
+
+        <!-- Empty State -->
+        <LinearLayout
+            android:id="@+id/emptyState"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Belum ada pesan"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Tekan + untuk memulai percakapan"
+                android:textColor="#6B7280"
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+
+    </FrameLayout>
+
+    <!-- FAB -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabNewMessage"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-</LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="100dp"
+        android:contentDescription="New message"
+        android:src="@drawable/ic_new_chat"
+        app:backgroundTint="@color/purple_btn"
+        app:tint="@android:color/white" />
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

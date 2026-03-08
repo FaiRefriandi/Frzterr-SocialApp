@@ -279,7 +279,7 @@ class AuthActivity : AppCompatActivity() {
             Log.e("GOOGLE_FLOW", "Launching Google Credential Manager...")
             setLoading(true)
 
-            val idToken = googleHelper.getGoogleIdToken()
+            val idToken = googleHelper.getGoogleIdToken(this@AuthActivity)
 
             if (idToken == null) {
                 setLoading(false)

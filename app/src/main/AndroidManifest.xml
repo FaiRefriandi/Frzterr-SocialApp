@@ -3,6 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
     <application
         android:name=".App"
@@ -50,6 +52,22 @@
             android:theme="@style/Theme.Frzterr"
             android:exported="false" />
 
+        <!-- CHAT (Direct Message) -->
+        <activity
+            android:name=".ui.message.ChatActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Frzterr"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+
+        <!-- NEW MESSAGE (User search to start chat) -->
+        <activity
+            android:name=".ui.message.NewMessageActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Frzterr"
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+
         <!-- SPLASH SCREEN -->
         <activity
             android:name=".ui.splash.SplashActivity"
@@ -69,9 +87,21 @@
             android:screenOrientation="portrait"
             android:exported="false"
             android:label="@string/app_name"
+            android:windowSoftInputMode="adjustResize"
             android:theme="@style/Theme.Frzterr" />
 
 
+
+        <!-- FileProvider untuk kamera AI Chat -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
     </application>
 

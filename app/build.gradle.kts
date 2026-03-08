@@ -80,7 +80,10 @@ dependencies {
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 
-    // Google Sign-In
+    // Google Sign-In (Credential Manager) - all versions aligned
+    implementation("androidx.credentials:credentials:1.3.0")
+    implementation("androidx.credentials:credentials-play-services-auth:1.3.0")
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
     implementation("com.google.android.gms:play-services-auth:21.2.0")
 
     // Desugaring
@@ -90,12 +93,6 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
-
-    implementation("androidx.credentials:credentials:1.3.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.0")
-    implementation("androidx.credentials:credentials-play-services-auth:1.2.0")
-
-    implementation("com.google.android.gms:play-services-auth:21.0.1")
 
     implementation(platform("com.google.firebase:firebase-bom:34.6.0"))
     implementation("com.google.firebase:firebase-analytics")

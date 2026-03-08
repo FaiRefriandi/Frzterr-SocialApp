@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="?attr/selectableItemBackground"
+    android:paddingStart="18dp"
+    android:paddingTop="10dp"
+    android:paddingEnd="18dp"
+    android:paddingBottom="10dp">
+
+    <!-- Avatar -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivAvatar"
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/CircleImageView" />
+
+    <!-- Timestamp — end-anchored, no start constraint to avoid conflict with tvUsername chain -->
+    <TextView
+        android:id="@+id/tvTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#6B7280"
+        android:textSize="12sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/ivAvatar" />
+
+    <!-- Username — spans from avatar to tvTimestamp -->
+    <TextView
+        android:id="@+id/tvUsername"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="@color/text_primary"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@id/tvTimestamp"
+        app:layout_constraintStart_toEndOf="@id/ivAvatar"
+        app:layout_constraintTop_toTopOf="@id/ivAvatar" />
+
+    <!-- Last message preview -->
+    <TextView
+        android:id="@+id/tvLastMessage"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="14dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:textColor="#9CA3AF"
+        android:textSize="13sp"
+        app:layout_constraintEnd_toStartOf="@id/ivUnreadBadge"
+        app:layout_constraintStart_toEndOf="@id/ivAvatar"
+        app:layout_constraintTop_toBottomOf="@id/tvUsername" />
+
+    <!-- Unread badge -->
+    <TextView
+        android:id="@+id/ivUnreadBadge"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/bg_chip_selected"
+        android:gravity="center"
+        android:textColor="#FFFFFF"
+        android:textSize="10sp"
+        android:textStyle="bold"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@id/tvLastMessage"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
